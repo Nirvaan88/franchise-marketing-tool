@@ -1,0 +1,36 @@
+[
+  {
+    "id": 1,
+    "store_name": "Default Store",
+    "address":"1701-B, 17th Floor,The Capital Building, B Wing, Opp. ICICI Bank, BKC, Mumbai, Maharashtra - 400051",
+    "mobile_number":"9876543210"
+
+  },
+  {
+    "id": 2,
+    "store_name": "Default Store",
+    "address":"23,MG Road,Camp Area, Pune,Maharashtra - 411001",
+    "mobile_number":"9123456789"
+  },
+  {
+    "id": 3,
+    "store_name":"Default Store",
+    "address":"12,Nehru Nagar,Andheri East, Mumbai,Maharashtra - 400069",
+    "mobile_number":"9156121076"
+  },
+
+ {
+    "id": 4,
+    "store_name":"Default Store",
+    "address":"12,17th Floor,The Capital, 1701-B, opp",
+    "mobile_number":"9156121089"
+  },
+
+ {
+    "id": 5,
+    "store_name":"Default Store",
+    "address":"1701-A, 17th Floor, The Capital Building, B – Wing, Opp. Icici Bank, Bandra Kurla Complex",
+    "mobile_number":"9156121089"
+  }
+
+]

@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Selected Product</title>
+</head>
+<body>
+    <h2>Selected Product</h2>
+    {% if product %}
+        <p><b>{{ product.item_code }}</b></p>
+        <img src="{{ product.image_path }}" width="200">
+    {% else %}
+        <p>No product selected yet.</p>
+    {% endif %}
+</body>
+</html>

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Marketing Template Editor</title>
+
+  <!-- App CSS -->
+  <link rel="stylesheet" href="/static/css/marketing-template.css">
+
+  <!-- libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+
+<h1>Marketing Template Editor</h1>
+
+<div class="controls">
+  <div>
+    <label>Upload Background Image:</label>
+    <input type="file" id="bgUpload" accept="image/*">
+  </div>
+
+  <div>
+    <label>Choose Background Color:</label>
+    <input type="color" id="bgColor">
+    <button onclick="applyColor()">Apply Color</button>
+  </div>
+
+  <div>
+    <label>Upload Logo:</label>
+    <input type="file" id="logoUpload" accept="image/*">
+  </div>
+
+  <div>
+    <label>Combined Color:</label>
+    <input type="color" id="combinedColor" value="#000000">
+    <button type="button" onclick="applyCombinedColor()">Apply Combined Color</button>
+  </div>
+
+  <div style="margin-top:8px;">
+    <label for="stateFilter">Select State:</label>
+    <select id="stateFilter">
+      <option value="">-- All States --</option>
+      <option value="Maharashtra">Maharashtra</option>
+      <option value="Tamil Nadu">Tamil Nadu</option>
+      <option value="Gujarat">Gujarat</option>
+      <option value="Karnataka">Karnataka</option>
+      <option value="Telangana">Telangana</option>
+      <option value="West Bengal">West Bengal</option>
+      <option value="Andhra Pradesh">Andhra Pradesh</option>
+      <option value="Rajasthan">Rajasthan</option>
+      <option value="Uttar Pradesh">Uttar Pradesh</option>
+      <option value="Madhya Pradesh">Madhya Pradesh</option>
+      <option value="Delhi">Delhi</option>
+      <option value="Punjab">Punjab</option>
+      <option value="Haryana">Haryana</option>
+      <option value="Bihar">Bihar</option>
+      <option value="Odisha">Odisha</option>
+      <option value="Kerala">Kerala</option>
+      <option value="Assam">Assam</option>
+      <option value="Jharkhand">Jharkhand</option>
+      <option value="Chhattisgarh">Chhattisgarh</option>
+      <option value="Uttarakhand">Uttarakhand</option>
+      <option value="Goa">Goa</option>
+      <option value="Himachal Pradesh">Himachal Pradesh</option>
+      <option value="Jammu and Kashmir">Jammu and Kashmir</option>
+      <option value="Puducherry">Puducherry</option>
+      <option value="Chandigarh">Chandigarh</option>
+    </select>
+
+    <label style="margin-left:10px;">Select Language:</label>
+    <select id="languageSelect">
+      <option value="en" selected>English</option>
+      <option value="hi">Hindi</option>
+      <option value="gu">Gujarati</option>
+      <option value="mr">Marathi</option>
+      <option value="ta">Tamil</option>
+      <option value="te">Telugu</option>
+      <option value="bn">Bengali</option>
+      <option value="kn">Kannada</option>
+    </select>
+
+    <span id="langColumnStatus" style="margin-left:10px; font-size:11px; color:#999;"></span>
+
+    <button id="generateStateTemplates" style="margin-left:10px;">Generate Templates</button>
+    <button onclick="clearAllTemplates()" style="margin-left:10px; background:#dc3545; color:white;">🗑️ Clear Templates</button>
+  </div>
+
+  <div style="margin-top:10px;"> 
+    <label>Upload Stores Excel (.xlsx/.xls/.csv):</label>
+    <input type="file" id="storesExcel" accept=".xlsx,.xls,.csv">
+    <small style="display:block; color:#666;">🧪 Or click "Test" to add dummy translations without backend (for testing)</small>
+  </div>
+
+  <div style="margin-top:8px;">
+    <label>Footer Text & Logo Color:</label>
+    <input type="color" id="footerTextColor" value="#9A6C0C">
+    <button type="button" onclick="applyFooterColor()">Apply Footer Color</button>
+  </div>
+
+  <div style="margin-top:8px;">
+    <label>Contact Logo Color:</label>
+    <input type="color" id="contactLogoColor" value="#000000">
+    <label style="margin-left:8px;">Store Name Color:</label>
+    <input type="color" id="storeNameColor" value="#000000">
+    <button type="button" onclick="applyColors()">Apply Colors</button>
+  </div>
+
+  <div style="margin-top:8px;">
+    <label>Add Footer Text:</label>
+    <input type="text" id="footerName" placeholder="Store Name">
+    <label style="margin-left:8px;">WhatsApp Number:</label>
+    <input type="text" id="footerWhatsApp" placeholder="WhatsApp Number">
+    <button type="button" onclick="updateFooterInfo()">Update Footer Text & WhatsApp</button>
+  </div>
+
+  <div style="margin-top:8px;">
+    <button onclick="downloadAllPerfectA4()" style="background:#555; color:white; font-weight:bold;">🖨 Download Perfect A4 PDF</button>
+  </div>
+
+  <div style="margin-top:10px; background:#fff; padding:15px; box-shadow:0 2px 6px rgba(0,0,0,0.06);">
+    <label>Upload Custom Template:</label>
+    <input type="file" id="templateUpload" accept="image/*">
+  </div>
+</div>
+
+<!-- single main editable template -->
+<div id="templateBox" class="template-box lang-en">
+  <div id="storeFooterName">Default Store Name</div>
+  <div id="storeFooter"></div>
+</div>
+
+<div id="templatesContainer" style="margin-top:20px; width:100%; max-width:1200px;"></div>
+
+<h2 style="width:100%; max-width:1200px; margin-left: calc(50% - 600px);">Templates</h2>
+<div class="thumbnail-slider" id="templateSlider" style="width:100%; max-width:1200px;"></div>
+
+<h2 style="width:100%; max-width:1200px; margin-left: calc(50% - 600px);">Products</h2>
+<div class="thumbnail-slider" id="productSlider" style="width:100%; max-width:1200px;"></div>
+
+<h2 style="width:100%; max-width:1200px; margin-left: calc(50% - 600px);">Banners</h2>
+<div class="thumbnail-slider" id="bannerSlider" style="width:100%; max-width:1200px;"></div>
+<script src="/static/js/marketing-template.js"></script>
+
+<!-- App JS -->
+<script src="/static/js/marketing-template.js"></script>
+<script src="{{ url_for('static', filename='js/marketing-template.js') }}"></script>
+
+</body>
+</html>

@@ -1,0 +1,295 @@
+@font-face { font-family: "NotoSans"; src: url("fonts/NotoSans-Regular.ttf") format("truetype"); }
+@font-face { font-family: "NotoSansDeva"; src: url("fonts/NotoSansDevanagari-Regular.ttf") format("truetype"); }
+@font-face { font-family: "NotoSansGuj"; src: url("fonts/NotoSansGujarati-Regular.ttf") format("truetype"); }
+@font-face { font-family: "NotoSansTamil"; src: url("fonts/NotoSansTamil-Regular.ttf") format("truetype"); }
+@font-face { font-family: "NotoSansBeng"; src: url("fonts/NotoSansBengali-Regular.ttf") format("truetype"); }
+@font-face { font-family: "NotoSansKannada"; src: url("fonts/NotoSansKannada-Regular.ttf") format("truetype"); }
+@font-face { font-family: "NotoSansTelugu"; src: url("fonts/NotoSansTelugu-Regular.ttf") format("truetype"); }
+
+.lang-en { font-family: "NotoSans", Arial, sans-serif; }
+.lang-hi { font-family: "NotoSansDeva", "NotoSans", sans-serif; }
+.lang-mr { font-family: "NotoSansDeva", "NotoSans", sans-serif; }
+.lang-gu { font-family: "NotoSansGuj", "NotoSans", sans-serif; }
+.lang-ta { font-family: "NotoSansTamil", "NotoSans", sans-serif; }
+.lang-bn { font-family: "NotoSansBeng", "NotoSans", sans-serif; }
+.lang-kn { font-family: "NotoSansKannada", "NotoSans", sans-serif; }
+.lang-te { font-family: "NotoSansTelugu", "NotoSans", sans-serif; }
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background-color: #f4f4f4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+h1 {
+  margin: 20px;
+}
+
+.controls {
+  width: 100%;
+  max-width: 1200px;
+  margin-bottom: 25px;
+  background: #fff;
+  padding: 15px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.template-box {
+  width: 794px;
+  height: 1123px;
+  border: 2px dashed #aaa;
+  background-color: transparent;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  margin: 0 auto;
+}
+
+.draggable {
+  position: absolute;
+  cursor: move;
+}
+
+.thumbnail-slider {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  margin-top: 10px;
+  padding-bottom: 30px;
+}
+
+.thumbnail-slider img {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border: 2px solid transparent;
+  cursor: pointer;
+}
+
+.thumbnail-slider img:hover {
+  border-color: #007bff;
+}
+
+/* initial store-address style (kept same) */
+.store-address {
+  display: inline !important;
+  color: #1a1a1a;
+  margin: 0 !important;
+  font-weight: 900;
+  font-size: inherit;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  -webkit-text-stroke: 0.2px #000;
+  text-shadow: 0.3px 0.3px 0 #000, -0.3px -0.3px 0 #000;
+  max-width: none !important;
+  padding: 0 !important;
+  position: static !important;
+  vertical-align: baseline !important;
+}
+
+.separator {
+  display: inline !important;
+  font-weight: 900;
+  font-size: 22px;
+  line-height: 1 !important;
+  color: #1a1a1a;
+  margin: 0 2px !important;
+  -webkit-text-stroke: 0.2px #000;
+  text-shadow: 0.3px 0.3px 0 #000, -0.3px -0.3px 0 #000;
+  vertical-align: baseline !important;
+}
+
+.contact-icon { 
+  display: inline-flex !important;
+  width: 1.3em;
+  height: 1.3em;
+  vertical-align: middle !important;
+  line-height: 1 !important;
+  margin: 0 4px 0 2px !important;
+  align-items: center;
+  justify-content: center;
+}
+
+.contact-icon img { 
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  filter: brightness(0) saturate(100%);
+}
+
+.store-mobile {
+  display: inline !important;
+  color: #000000;
+  font-weight: 900;
+  font-size: inherit;
+  line-height: 1 !important;
+  margin: 0 !important;
+  -webkit-text-stroke: 0.5px #000;
+  text-shadow: 0.5px 0.5px 0 #000, -0.5px -0.5px 0 #000;
+  vertical-align: baseline !important;
+  white-space: nowrap !important;
+}
+
+/* ---------- FOOTER: single centered line with inline-flex and auto-fit ---------- */
+#storeFooterName,
+#storeFooterNameFinal {
+  position: absolute;
+  bottom: 88px !important;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  color: #000;
+  font-size: 18px;
+  white-space: nowrap !important;
+  display: inline-flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px;
+  padding: 2px 8px;
+  box-sizing: border-box;
+  max-width: 92%;
+  pointer-events: none;
+  line-height: 1 !important;
+}
+
+/* store-address override in footer (kept same as your code) */
+.store-address {
+  display: inline !important;
+  color: #000000 !important;
+  font-family: 'Arial', 'Helvetica', sans-serif !important;
+  font-weight: 900;
+  white-space: nowrap !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  vertical-align: middle !important;
+  -webkit-text-stroke: 0.5px #000;
+  text-shadow: 0.5px 0.5px 0 #000, -0.5px -0.5px 0 #000;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* force all footers a bit more left — quick override */
+#storeFooterName,
+#storeFooterNameFinal {
+  position: absolute;
+  bottom: 55px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+  width: max-content;
+  max-width: 92%;
+  gap: 4px !important;
+  letter-spacing: 0px !important;
+  font-size: 18px !important;
+  color: #000 !important;
+  font-weight: 900 !important;
+}
+
+/* Address styling */
+#storeFooterName .store-address,
+#storeFooterNameFinal .store-address {
+  margin-right: 0 !important;
+  display: inline !important;
+  white-space: nowrap !important;
+  text-overflow: clip !important;
+  overflow: visible !important;
+  line-height: 1 !important;
+  text-align: center !important;
+}
+
+/* Remove left shift for long addresses - keep everything centered */
+#storeFooterName.long,
+#storeFooterNameFinal.long {
+  transform: translateX(-50%) !important;
+}
+
+/* Separator (pipe) — keep fixed size and inline */
+.separator {
+  display: inline !important;
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 1 !important;
+  color: #000000;
+  margin: 0 -2px 0 0 !important;
+  padding: 0 !important;
+  -webkit-text-stroke: 0px;
+  text-shadow: none;
+  flex: 0 0 auto;
+  vertical-align: middle !important;
+  white-space: nowrap !important;
+  transform: scaleY(1.5) !important;
+}
+
+/* Contact icon — keep small and inline, never wrap (footer) */
+.contact-icon {
+  display: inline-flex !important;
+  width: 20px !important;
+  height: 20px !important;
+  margin: 0 3px 0 4px !important;
+  vertical-align: middle !important;
+  line-height: 1 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.contact-icon img {
+  display: block !important;
+  width: 20px !important;
+  height: 20px !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  filter: brightness(0) saturate(100%) !important;
+  object-fit: contain !important;
+  filter: none !important;
+}
+
+/* Mobile number */
+.store-mobile {
+  display: inline !important;
+  color: #000000;
+  font-family: 'Arial', 'Helvetica', sans-serif !important;
+  font-weight: 900;
+  font-size: inherit;
+  line-height: 1 !important;
+  margin: 0 0 0 -2px !important;
+  -webkit-text-stroke: 0.5px #000;
+  text-shadow: 0.5px 0.5px 0 #000, -0.5px -0.5px 0 #000;
+  flex: 0 0 auto;
+  white-space: nowrap !important;
+  vertical-align: middle !important;
+  letter-spacing: -0.5px !important;
+}
+
+.badge-debug {
+  position:absolute;
+  top:6px;
+  right:6px;
+  background:#111;
+  color:#fff;
+  padding:3px 6px;
+  border-radius:3px;
+  font-size:11px;
+  z-index:2000;
+}
+
+/* Perfect centered footer – same as reference image */
