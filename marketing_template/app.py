@@ -17,7 +17,7 @@ def load_products():
 ## Removed duplicate root route to fix Flask error
 @app.route("/")
 def home():
-    return redirect(url_for("marketing_template_editor"))
+    return redirect(url_for("marketing_template_editor.html"))
 
 # Marketing page now also receives the session’s selected product
 @app.route("/marketing_template_editor")
