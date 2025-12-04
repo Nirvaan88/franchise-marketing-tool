@@ -15,6 +15,9 @@ def load_products():
         data = json.load(f)
     return data["data"]
 ## Removed duplicate root route to fix Flask error
+@app.route("/")
+def home():
+    return redirect(url_for("marketing_template_editor"))
 
 # Marketing page now also receives the session’s selected product
 @app.route("/marketing_template_editor")
@@ -53,11 +56,6 @@ def listing():
     return render_template("listing.html", products=products)
 
 
-
-
-@app.route("/")
-def home():
-    return redirect(url_for("marketing_template_editor"))
 
 
 # Upload Primary and Secondary Template: display one below the other
