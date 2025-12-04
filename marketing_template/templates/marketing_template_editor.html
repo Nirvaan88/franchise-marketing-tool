@@ -68,6 +68,7 @@
       <option value="Jammu and Kashmir">Jammu and Kashmir</option>
       <option value="Puducherry">Puducherry</option>
       <option value="Chandigarh">Chandigarh</option>
+      <option value="Chandigarh">Chandigarh</option>
     </select>
 
     <label style="margin-left:10px;">Select Language:</label>
@@ -108,6 +109,16 @@
     <button type="button" onclick="applyColors()">Apply Colors</button>
   </div>
 
+
+  <div style="margin-top:8px;">
+    <label>Contact Logo Color:</label>
+    <input type="color" id="contactLogoColor" value="#000000">
+    <label style="margin-left:8px;">Store Name Color:</label>
+    <input type="color" id="storeNameColor" value="#000000">
+    <button type="button" onclick="applyColors()">Apply Colors</button>
+  </div>
+
+
   <div style="margin-top:8px;">
     <label>Add Footer Text:</label>
     <input type="text" id="footerName" placeholder="Store Name">
@@ -116,21 +127,70 @@
     <button type="button" onclick="updateFooterInfo()">Update Footer Text & WhatsApp</button>
   </div>
 
+
+
+
+
+
   <div style="margin-top:8px;">
     <button onclick="downloadAllPerfectA4()" style="background:#555; color:white; font-weight:bold;">🖨 Download Perfect A4 PDF</button>
   </div>
+
 
   <div style="margin-top:10px; background:#fff; padding:15px; box-shadow:0 2px 6px rgba(0,0,0,0.06);">
     <label>Upload Custom Template:</label>
     <input type="file" id="templateUpload" accept="image/*">
   </div>
+
+
+
+
+
+  <div style="margin-top:10px;">
+    <label>Upload Primary Template (English):</label>
+    <input type="file" id="templateUploadPrimary" accept="image/*">
+  </div>
+  <div id="primaryTemplateBox" style="margin:10px 0; min-height:120px; border:1px solid #ccc; display:flex; align-items:center; justify-content:center; background:#fafafa;"></div>
+
+  <!-- Upload secondary (local-language) template -->
+  <div style="margin-top:10px;">
+    <label>Upload Secondary Template (Local language):</label>
+    <input type="file" id="templateUploadSecondary" accept="image/*">
+    <label style="margin-left:8px;">Secondary Template Language:</label>
+    <select id="secondaryTemplateLang">
+      <option value="hi">Hindi</option>
+      <option value="mr">Marathi</option>
+      <option value="gu">Gujarati</option>
+      <option value="ta">Tamil</option>
+      <option value="te">Telugu</option>
+      <option value="bn">Bengali</option>
+      <option value="kn">Kannada</option>
+    </select>
+    <small style="display:block;color:#666;">Secondary template uses address_hi, address_mr, etc.</small>
+  </div>
+  <div id="secondaryTemplateBox" style="margin:10px 0; min-height:120px; border:1px solid #ccc; display:flex; align-items:center; justify-content:center; background:#fafafa;"></div>
+
+</div> <!-- end controls -->
 </div>
+
 
 <!-- single main editable template -->
 <div id="templateBox" class="template-box lang-en">
   <div id="storeFooterName">Default Store Name</div>
   <div id="storeFooter"></div>
 </div>
+
+<div id="primaryTemplateBox" style="margin:10px 0; min-height:120px; border:1px solid #ccc; display:flex; align-items:center; justify-content:center; background:#fafafa;"></div>
+<div id="secondaryTemplateBox" style="margin:10px 0; min-height:120px; border:1px solid #ccc; display:flex; align-items:center; justify-content:center; background:#fafafa;"></div>
+
+
+<button onclick="downloadTemplateWithLang('primary')">Download Primary</button>
+<button onclick="downloadTemplateWithLang('secondary')">Download Secondary</button>
+
+
+
+
+
 
 <div id="templatesContainer" style="margin-top:20px; width:100%; max-width:1200px;"></div>
 
@@ -144,9 +204,82 @@
 <div class="thumbnail-slider" id="bannerSlider" style="width:100%; max-width:1200px;"></div>
 <script src="/static/js/marketing-template.js"></script>
 
-<!-- App JS -->
-<script src="/static/js/marketing-template.js"></script>
-<script src="{{ url_for('static', filename='js/marketing-template.js') }}"></script>
+
+<script>
+
+  // your old JS code here
+  // your preview rendering code here
+
+  /* ---- PASTE HERE ---- */
+
+  async function downloadTemplateWithLang(kind = 'primary') {
+    const templateBox = document.getElementById('templateBox');
+    const storeAddress = document.getElementById('storeAddress');
+
+    const englishAddress = "21B, Annamalai Nagar, Karur Bypass Road, Tiruchirappalli | 9156121076";
+    const localAddress   = "168A, கிழவெலி வீதி, மதுரை | 9156121076";
+
+    storeAddress.textContent = (kind === 'primary') ? englishAddress : localAddress;
+    storeAddress.setAttribute('lang', 'ta');
+    storeAddress.style.fontFamily = "'Noto Sans Tamil', 'Noto Sans', sans-serif";
+
+    if (document.fonts && document.fonts.ready) await document.fonts.ready;
+    await waitForImagesInNode(templateBox, 3000);
+
+    void templateBox.offsetHeight;
+    await new Promise(r => setTimeout(r, 150));
+
+    const canvas = await html2canvas(templateBox, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: false,
+      scrollY: -window.scrollY
+    });
+
+    const imgData = canvas.toDataURL('image/png');
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ unit: 'pt', format: 'a4' });
+
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const imgWidth = pageWidth;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+    const filename = (kind === 'primary') ? 'template_primary_english.pdf' : 'template_secondary_local.pdf';
+    pdf.save(filename);
+  }
+
+  function waitForImagesInNode(node, timeout = 3000) {
+    const imgs = Array.from(node.querySelectorAll('img'));
+    if (!imgs.length) return Promise.resolve();
+    return new Promise(resolve => {
+      let remaining = imgs.length;
+      const done = () => { if (--remaining <= 0) resolve(); };
+      imgs.forEach(img => {
+        if (img.complete) done();
+        else { img.addEventListener('load', done); img.addEventListener('error', done); }
+      });
+      setTimeout(resolve, timeout);
+    });
+  }
+
+  /* ---- END PASTE ---- */
+
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 </body>
 </html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Show Primary and Secondary Template</title>
+    <style>
+        .template-box {
+            border: 2px solid #007bff;
+            padding: 16px;
+            margin-bottom: 24px;
+            background: #f8f9fa;
+        }
+        .template-label {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="template-box">
+        <div class="template-label">Primary Template</div>
+        {% if filenames and filenames|length > 0 %}
+            {% include filenames[0] %}
+        {% else %}
+            <div>No primary template uploaded.</div>
+        {% endif %}
+    </div>
+    <div class="template-box">
+        <div class="template-label">Secondary Template</div>
+        {% if filenames and filenames|length > 1 %}
+            {% include filenames[1] %}
+        {% else %}
+            <div>No secondary template uploaded.</div>
+        {% endif %}
+    </div>
+</body>
+</html>

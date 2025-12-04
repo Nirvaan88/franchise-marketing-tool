@@ -1,6 +1,9 @@
 import os
 import json
-from flask import Flask, render_template, session, redirect, url_for
+from flask import Flask, render_template, session, redirect, url_for, request
+
+# For reading Excel
+import pandas as pd
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"   # Needed for sessions
@@ -11,10 +14,7 @@ def load_products():
     with open(json_path, "r", encoding="utf-8-sig") as f:
         data = json.load(f)
     return data["data"]
-# Redirect root to marketing page
-@app.route("/")
-def home():
-    return redirect(url_for("marketing_template_editor"))
+## Removed duplicate root route to fix Flask error
 
 # Marketing page now also receives the session’s selected product
 @app.route("/marketing_template_editor")
@@ -51,6 +51,43 @@ def show_selected():
 def listing():
     products = load_products()         # load products from data.json
     return render_template("listing.html", products=products)
+
+
+
+# @app.route("/marketing_template_listing")
+# def marketing_template_listing():
+#     products = load_products()         # load products from data.json
+#     return render_template("listing.html", products=products)
+
+# Upload two templates and display one below the other at root URL
+@app.route("/")
+def home():
+    return redirect(url_for("marketing_template_editor"))
+
+
+# Upload Primary and Secondary Template: display one below the other
+@app.route("/upload_primary_secondary", methods=["GET", "POST"])
+def upload_primary_secondary():
+    if request.method == "POST":
+        file1 = request.files.get("primary_template")
+        file2 = request.files.get("secondary_template")
+        filenames = []
+        print(f"Primary template uploaded: {file1.filename if file1 else None}")
+        print(f"Secondary template uploaded: {file2.filename if file2 else None}")
+        if file1:
+            filename1 = "uploaded_primary_template.html"
+            file1.save(os.path.join(app.root_path, "templates", filename1))
+            print(f"Saved primary template as {filename1}")
+            filenames.append(filename1)
+        if file2:
+            filename2 = "uploaded_secondary_template.html"
+            file2.save(os.path.join(app.root_path, "templates", filename2))
+            print(f"Saved secondary template as {filename2}")
+            filenames.append(filename2)
+        print(f"Filenames list for output: {filenames}")
+        return render_template("show_primary_secondary.html", filenames=filenames)
+    return render_template("upload_primary_secondary.html")
+
 
 if __name__ == "__main__":
     app.run(debug=True)
