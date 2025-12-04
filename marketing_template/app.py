@@ -85,4 +85,4 @@ def upload_primary_secondary():
 
 
 if __name__ == "__main__":
-    app.run(debug=False,port=8000)
+    app.run(debug=False,host='0.0.0.0',port=8000)
