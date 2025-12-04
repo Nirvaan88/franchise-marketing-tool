@@ -54,12 +54,7 @@ def listing():
 
 
 
-# @app.route("/marketing_template_listing")
-# def marketing_template_listing():
-#     products = load_products()         # load products from data.json
-#     return render_template("listing.html", products=products)
 
-# Upload two templates and display one below the other at root URL
 @app.route("/")
 def home():
     return redirect(url_for("marketing_template_editor"))
@@ -90,4 +85,4 @@ def upload_primary_secondary():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True,port=5001)
