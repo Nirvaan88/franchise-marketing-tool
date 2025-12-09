@@ -17,27 +17,9 @@
 <h1>Marketing Template Editor</h1>
 
 <div class="controls">
-  <div>
-    <label>Upload Background Image:</label>
-    <input type="file" id="bgUpload" accept="image/*">
-  </div>
+  <!-- Background color and logo upload controls removed per latest requirements -->
 
-  <div>
-    <label>Choose Background Color:</label>
-    <input type="color" id="bgColor">
-    <button onclick="applyColor()">Apply Color</button>
-  </div>
-
-  <div>
-    <label>Upload Logo:</label>
-    <input type="file" id="logoUpload" accept="image/*">
-  </div>
-
-  <div>
-    <label>Combined Color:</label>
-    <input type="color" id="combinedColor" value="#000000">
-    <button type="button" onclick="applyCombinedColor()">Apply Combined Color</button>
-  </div>
+  <!-- Combined color control removed per request -->
 
   <div style="margin-top:8px;">
     <label for="stateFilter">Select State:</label>
@@ -92,7 +74,6 @@
   <div style="margin-top:10px;"> 
     <label>Upload Stores Excel (.xlsx/.xls/.csv):</label>
     <input type="file" id="storesExcel" accept=".xlsx,.xls,.csv">
-    <small style="display:block; color:#666;">🧪 Or click "Test" to add dummy translations without backend (for testing)</small>
   </div>
 
   <div style="margin-top:8px;">
@@ -102,42 +83,18 @@
   </div>
 
   <div style="margin-top:8px;">
-    <label>Contact Logo Color:</label>
-    <input type="color" id="contactLogoColor" value="#000000">
-    <label style="margin-left:8px;">Store Name Color:</label>
-    <input type="color" id="storeNameColor" value="#000000">
-    <button type="button" onclick="applyColors()">Apply Colors</button>
-  </div>
-
-
-  <div style="margin-top:8px;">
-    <label>Contact Logo Color:</label>
-    <input type="color" id="contactLogoColor" value="#000000">
-    <label style="margin-left:8px;">Store Name Color:</label>
-    <input type="color" id="storeNameColor" value="#000000">
-    <button type="button" onclick="applyColors()">Apply Colors</button>
-  </div>
-
-
-  <div style="margin-top:8px;">
     <label>Add Footer Text:</label>
     <input type="text" id="footerName" placeholder="Store Name">
     <label style="margin-left:8px;">WhatsApp Number:</label>
     <input type="text" id="footerWhatsApp" placeholder="WhatsApp Number">
     <button type="button" onclick="updateFooterInfo()">Update Footer Text & WhatsApp</button>
   </div>
-
-
-
-
-
-
-  <div style="margin-top:8px;">
+<div style="margin-top:8px;">
     <button onclick="downloadAllPerfectA4()" style="background:#555; color:white; font-weight:bold;">🖨 Download Perfect A4 PDF</button>
   </div>
 
 
-  <div style="margin-top:10px; background:#fff; padding:15px; box-shadow:0 2px 6px rgba(0,0,0,0.06);">
+  <div style="margin-top:10px;">
     <label>Upload Custom Template:</label>
     <input type="file" id="templateUpload" accept="image/*">
   </div>
@@ -156,16 +113,6 @@
   <div style="margin-top:10px;">
     <label>Upload Secondary Template (Local language):</label>
     <input type="file" id="templateUploadSecondary" accept="image/*">
-    <label style="margin-left:8px;">Secondary Template Language:</label>
-    <select id="secondaryTemplateLang">
-      <option value="hi">Hindi</option>
-      <option value="mr">Marathi</option>
-      <option value="gu">Gujarati</option>
-      <option value="ta">Tamil</option>
-      <option value="te">Telugu</option>
-      <option value="bn">Bengali</option>
-      <option value="kn">Kannada</option>
-    </select>
     <small style="display:block;color:#666;">Secondary template uses address_hi, address_mr, etc.</small>
   </div>
   <div id="secondaryTemplateBox" style="margin:10px 0; min-height:120px; border:1px solid #ccc; display:flex; align-items:center; justify-content:center; background:#fafafa;"></div>
@@ -180,13 +127,17 @@
   <div id="storeFooter"></div>
 </div>
 
-<div id="primaryTemplateBox" style="margin:10px 0; min-height:120px; border:1px solid #ccc; display:flex; align-items:center; justify-content:center; background:#fafafa;"></div>
+<!-- <div id="primaryTemplateBox" style="margin:10px 0; min-height:120px; border:1px solid #ccc; display:flex; align-items:center; justify-content:center; background:#fafafa;"></div>
 <div id="secondaryTemplateBox" style="margin:10px 0; min-height:120px; border:1px solid #ccc; display:flex; align-items:center; justify-content:center; background:#fafafa;"></div>
 
+ -->
 
-<button onclick="downloadTemplateWithLang('primary')">Download Primary</button>
-<button onclick="downloadTemplateWithLang('secondary')">Download Secondary</button>
 
+
+<div style="margin-top:20px;">
+  <button onclick="downloadTemplateWithLang('primary')">Download Primary</button>
+  <button onclick="downloadTemplateWithLang('secondary')">Download Secondary</button>
+</div>
 
 
 
@@ -214,14 +165,37 @@
 
   async function downloadTemplateWithLang(kind = 'primary') {
     const templateBox = document.getElementById('templateBox');
-    const storeAddress = document.getElementById('storeAddress');
+    const footerPrimary = document.getElementById('storeFooterName');
+    const footerLegacy = document.getElementById('storeFooter');
 
     const englishAddress = "21B, Annamalai Nagar, Karur Bypass Road, Tiruchirappalli | 9156121076";
     const localAddress   = "168A, கிழவெலி வீதி, மதுரை | 9156121076";
 
-    storeAddress.textContent = (kind === 'primary') ? englishAddress : localAddress;
-    storeAddress.setAttribute('lang', 'ta');
-    storeAddress.style.fontFamily = "'Noto Sans Tamil', 'Noto Sans', sans-serif";
+    const footerValue = (kind === 'primary') ? englishAddress : localAddress;
+    const parts = footerValue.split('|');
+    const addressPart = (parts[0] || "").trim();
+    const phonePart = (parts[1] || "").trim();
+    const footerHtml = `<span class="store-address">${escapeHtml(addressPart)}</span>${buildContactSegment(phonePart)}`;
+
+    [footerPrimary, footerLegacy].forEach(el => {
+      if (!el) return;
+      el.innerHTML = footerHtml;
+      el.style.display = "inline-flex";
+      el.style.alignItems = "center";
+      el.style.justifyContent = "center";
+      el.style.whiteSpace = "nowrap";
+      el.style.pointerEvents = "none";
+      el.setAttribute('lang', kind === 'primary' ? 'en' : 'ta');
+      el.style.fontFamily = kind === 'primary'
+        ? "'Noto Sans', 'Arial', sans-serif"
+        : "'Noto Sans Tamil', 'Noto Sans', sans-serif";
+    });
+
+    syncFinalLayerFor(templateBox);
+    await inlineSvgAsDataUrl('#storeFooterName .contact-icon img');
+    await inlineSvgAsDataUrl('#storeFooterNameFinal .contact-icon img');
+    await inlineSvgAsDataUrl('#storeFooter .contact-icon img');
+    runFooterFixes(templateBox);
 
     if (document.fonts && document.fonts.ready) await document.fonts.ready;
     await waitForImagesInNode(templateBox, 3000);
@@ -266,20 +240,6 @@
   /* ---- END PASTE ---- */
 
 </script>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 </body>
 </html>

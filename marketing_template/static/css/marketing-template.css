@@ -98,10 +98,10 @@ h1 {
 .separator {
   display: inline !important;
   font-weight: 900;
-  font-size: 22px;
+  font-size: 28px;
   line-height: 1 !important;
   color: #1a1a1a;
-  margin: 0 2px !important;
+  margin: 0 4px !important;
   -webkit-text-stroke: 0.2px #000;
   text-shadow: 0.3px 0.3px 0 #000, -0.3px -0.3px 0 #000;
   vertical-align: baseline !important;
@@ -109,11 +109,11 @@ h1 {
 
 .contact-icon { 
   display: inline-flex !important;
-  width: 1.3em;
-  height: 1.3em;
+  width: 1.9em;
+  height: 1.9em;
   vertical-align: middle !important;
   line-height: 1 !important;
-  margin: 0 4px 0 2px !important;
+  margin: 0 9px 0 6px !important;
   align-items: center;
   justify-content: center;
 }
@@ -145,7 +145,7 @@ h1 {
   position: absolute;
   bottom: 88px !important;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-52%);
   text-align: center;
   color: #000;
   font-size: 18px;
@@ -188,7 +188,7 @@ h1 {
   position: absolute;
   bottom: 55px !important;
   left: 50% !important;
-  transform: translateX(-50%) !important;
+  transform: translateX(-55%) !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -289,6 +289,7 @@ h1 {
   padding:3px 6px;
   border-radius:3px;
   font-size:11px;
+
   z-index:2000;
 }
 
