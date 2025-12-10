@@ -1,11 +1,18 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8" />
-  <title>Marketing Template Editor</title>
 
-  <!-- App CSS -->
-  <link rel="stylesheet" href="/static/css/marketing-template.css">
+<head>
+<style>
+.header-area{
+    background-color: hsl(240, 30%, 89%);
+    padding: 40px 0;
+    text-align: center;
+}
+</style>
+
+ <!-- App CSS -->
+<link rel="stylesheet" href="/static/css/marketing-template.css">
 
   <!-- libraries -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -14,7 +21,14 @@
 </head>
 <body>
 
-<h1>Marketing Template Editor</h1>
+<div class="header-area">
+  <img src="{{ url_for('static', filename='images/kisna.png') }}"
+       style="width:200px; display:block; margin:0 auto 20px;"
+       alt="Kisna Logo">
+  <!-- <h1>Marketing Template Editor</h1> -->
+   <h1 style="color:#002366;">Marketing Template Editor</h1>
+
+</div>
 
 <div class="controls">
   <!-- Background color and logo upload controls removed per latest requirements -->
@@ -99,17 +113,14 @@
     <input type="file" id="templateUpload" accept="image/*">
   </div>
 
-
-
-
-
-  <div style="margin-top:10px;">
+<div style="margin-top:10px;">
     <label>Upload Primary Template (English):</label>
     <input type="file" id="templateUploadPrimary" accept="image/*">
   </div>
   <div id="primaryTemplateBox" style="margin:10px 0; min-height:120px; border:1px solid #ccc; display:flex; align-items:center; justify-content:center; background:#fafafa;"></div>
 
-  <!-- Upload secondary (local-language) template -->
+
+<!-- Upload secondary (local-language) template -->
   <div style="margin-top:10px;">
     <label>Upload Secondary Template (Local language):</label>
     <input type="file" id="templateUploadSecondary" accept="image/*">
@@ -127,21 +138,11 @@
   <div id="storeFooter"></div>
 </div>
 
-<!-- <div id="primaryTemplateBox" style="margin:10px 0; min-height:120px; border:1px solid #ccc; display:flex; align-items:center; justify-content:center; background:#fafafa;"></div>
-<div id="secondaryTemplateBox" style="margin:10px 0; min-height:120px; border:1px solid #ccc; display:flex; align-items:center; justify-content:center; background:#fafafa;"></div>
-
- -->
-
-
 
 <div style="margin-top:20px;">
   <button onclick="downloadTemplateWithLang('primary')">Download Primary</button>
   <button onclick="downloadTemplateWithLang('secondary')">Download Secondary</button>
 </div>
-
-
-
-
 
 <div id="templatesContainer" style="margin-top:20px; width:100%; max-width:1200px;"></div>
 
@@ -168,33 +169,44 @@
     const footerPrimary = document.getElementById('storeFooterName');
     const footerLegacy = document.getElementById('storeFooter');
 
-    const englishAddress = "21B, Annamalai Nagar, Karur Bypass Road, Tiruchirappalli | 9156121076";
-    const localAddress   = "168A, கிழவெலி வீதி, மதுரை | 9156121076";
+    const footerInputs = {
+      name: (document.getElementById('footerName')?.value || '').trim(),
+      phone: (document.getElementById('footerWhatsApp')?.value || '').trim()
+    };
 
-    const footerValue = (kind === 'primary') ? englishAddress : localAddress;
-    const parts = footerValue.split('|');
-    const addressPart = (parts[0] || "").trim();
-    const phonePart = (parts[1] || "").trim();
-    const footerHtml = `<span class="store-address">${escapeHtml(addressPart)}</span>${buildContactSegment(phonePart)}`;
+    const existingFooter = footerPrimary && footerPrimary.innerHTML.trim()
+      ? footerPrimary
+      : (footerLegacy && footerLegacy.innerHTML.trim() ? footerLegacy : null);
+
+    const currentHtml = existingFooter && existingFooter.innerHTML.trim()
+      ? existingFooter.innerHTML
+      : `<span class="store-address">${escapeHtml(footerInputs.name || 'Store Name')}</span>${buildContactSegment(footerInputs.phone || '')}`;
+
+    const currentLang = existingFooter?.getAttribute('lang') || footerPrimary?.getAttribute('lang') || footerLegacy?.getAttribute('lang') || 'en';
+    const currentFont = existingFooter?.style?.fontFamily || footerPrimary?.style?.fontFamily || footerLegacy?.style?.fontFamily || "'Noto Sans', 'Arial', sans-serif";
 
     [footerPrimary, footerLegacy].forEach(el => {
       if (!el) return;
-      el.innerHTML = footerHtml;
+      el.innerHTML = currentHtml;
       el.style.display = "inline-flex";
       el.style.alignItems = "center";
       el.style.justifyContent = "center";
       el.style.whiteSpace = "nowrap";
       el.style.pointerEvents = "none";
-      el.setAttribute('lang', kind === 'primary' ? 'en' : 'ta');
-      el.style.fontFamily = kind === 'primary'
-        ? "'Noto Sans', 'Arial', sans-serif"
-        : "'Noto Sans Tamil', 'Noto Sans', sans-serif";
+      el.setAttribute('lang', currentLang);
+      el.style.fontFamily = currentFont;
     });
 
     syncFinalLayerFor(templateBox);
-    await inlineSvgAsDataUrl('#storeFooterName .contact-icon img');
-    await inlineSvgAsDataUrl('#storeFooterNameFinal .contact-icon img');
-    await inlineSvgAsDataUrl('#storeFooter .contact-icon img');
+    runFooterFixes(templateBox);
+
+    await inlineSvgAsDataUrl('#storeFooterName .contact-icon img', { preferDataUrl: true });
+    await inlineSvgAsDataUrl('#storeFooterNameFinal .contact-icon img', { preferDataUrl: true });
+    await inlineSvgAsDataUrl('#storeFooter .contact-icon img', { preferDataUrl: true });
+    await convertSvgImagesToPng('#storeFooterName .contact-icon img');
+    await convertSvgImagesToPng('#storeFooterNameFinal .contact-icon img');
+    await convertSvgImagesToPng('#storeFooter .contact-icon img');
+
     runFooterFixes(templateBox);
 
     if (document.fonts && document.fonts.ready) await document.fonts.ready;

@@ -82,6 +82,89 @@ const SKIP_LANG_SUFFIXES = new Set([
   "address",
   "local"
 ]);
+// === Make any uploaded image into crisp A4 background ===
+async function renderFileToA4DataUrl(file) {
+  // Read file as DataURL
+  const dataUrl = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => resolve(e.target.result);
+    reader.onerror = e => reject(e);
+    reader.readAsDataURL(file);
+  });
+
+  // Load into Image
+  const img = new Image();
+  img.crossOrigin = "anonymous";
+  img.src = dataUrl;
+
+  await new Promise((resolve, reject) => {
+    img.onload = () => resolve();
+    img.onerror = () => reject(new Error("Could not load template image"));
+  });
+
+  // A4 at high resolution
+  const A4_W = 2480;
+  const A4_H = 3508;
+
+  const canvas = document.createElement("canvas");
+  canvas.width = A4_W;
+  canvas.height = A4_H;
+
+  const ctx = canvas.getContext("2d");
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, A4_W, A4_H);
+
+  const ratio = Math.min(A4_W / img.width, A4_H / img.height);
+  const drawW = img.width * ratio;
+  const drawH = img.height * ratio;
+  const dx = (A4_W - drawW) / 2;
+  const dy = (A4_H - drawH) / 2;
+
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(img, dx, dy, drawW, drawH);
+
+  // HD PNG data URL
+  return canvas.toDataURL("image/png", 1.0);
+}
+async function loadCustomTemplate(file) {
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+
+    const imgUrl = e.target.result;
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.src = imgUrl;
+
+    await new Promise(r => img.onload = r);
+
+    // FORCE A4 HIGH RES
+    const A4_W = 2480;
+    const A4_H = 3508;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = A4_W;
+    canvas.height = A4_H;
+
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, A4_W, A4_H);
+
+    const ratio = Math.min(A4_W / img.width, A4_H / img.height);
+    const w = img.width * ratio;
+    const h = img.height * ratio;
+
+    const x = (A4_W - w) / 2;
+    const y = (A4_H - h) / 2;
+
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(img, x, y, w, h);
+
+    TEMPLATE_BG_DATA_URL = canvas.toDataURL("image/png", 1.0);
+  };
+  reader.readAsDataURL(file);
+}
 
 function normalizeLangCode(code) {
   if (code == null) return "";
@@ -285,6 +368,43 @@ async function inlineSvgAsDataUrl(imgSelector, options = {}) {
 
   console.log('inlineSvgAsDataUrl: applied src to', nodes.length, 'elements; finalSrc:', finalSrc && finalSrc.slice(0,80));
   return true;
+}
+
+// Convert matched <img> elements (typically SVG data URLs) into PNG data URLs for html2canvas compatibility
+async function convertSvgImagesToPng(imgSelector, size = 24) {
+  const imgs = Array.from(document.querySelectorAll(imgSelector));
+  if (!imgs.length) return;
+
+  await Promise.all(imgs.map(img => new Promise(resolve => {
+    try {
+      const src = img.getAttribute('src');
+      if (!src || !/^data:image\/svg/.test(src)) return resolve();
+
+      const loader = new Image();
+      loader.crossOrigin = 'anonymous';
+      loader.onload = function () {
+        try {
+          const dim = Math.max(size, parseInt(window.getComputedStyle(img).width, 10) || size);
+          const canvas = document.createElement('canvas');
+          canvas.width = dim;
+          canvas.height = dim;
+          const ctx = canvas.getContext('2d');
+          ctx.clearRect(0, 0, dim, dim);
+          ctx.drawImage(loader, 0, 0, dim, dim);
+          const pngData = canvas.toDataURL('image/png');
+          if (pngData) img.setAttribute('src', pngData);
+        } catch (err) {
+          console.warn('convertSvgImagesToPng draw error', err);
+        }
+        resolve();
+      };
+      loader.onerror = function () { resolve(); };
+      loader.src = src;
+    } catch (error) {
+      console.warn('convertSvgImagesToPng error', error);
+      resolve();
+    }
+  })));
 }
 
 
@@ -787,27 +907,46 @@ function updateStateDropdown() {
 })();
 
 
+/* ---------- Template upload (single background) ---------- */
+// document.getElementById("templateUpload").addEventListener("change", function(e){
+//   const file = e.target.files[0];
+//   if (!file) return;
 
+//   const reader = new FileReader();
+//   reader.onload = ev => {
+//     const url = ev.target.result;
+//     TEMPLATE_BG_DATA_URL = url;
 
+//     templateBox.style.backgroundImage = `url(${url})`;
+//     templateBox.style.backgroundSize = "cover";
+//     templateBox.style.backgroundPosition = "center";
+
+//     alert("Template uploaded. Now choose language and click 'Generate Templates'.");
+//   };
+//   reader.readAsDataURL(file); 
+// });
 
 
 /* ---------- Template upload (single background) ---------- */
-document.getElementById("templateUpload").addEventListener("change", function(e){
+document.getElementById("templateUpload").addEventListener("change", async function(e){
   const file = e.target.files[0];
   if (!file) return;
 
-  const reader = new FileReader();
-  reader.onload = ev => {
-    const url = ev.target.result;
-    TEMPLATE_BG_DATA_URL = url;
+  try {
+    // Convert uploaded image to crisp A4 background
+    const hdDataUrl = await renderFileToA4DataUrl(file);
 
-    templateBox.style.backgroundImage = `url(${url})`;
+    TEMPLATE_BG_DATA_URL = hdDataUrl;
+
+    templateBox.style.backgroundImage = `url(${hdDataUrl})`;
     templateBox.style.backgroundSize = "cover";
     templateBox.style.backgroundPosition = "center";
 
-    alert("Template uploaded. Now choose language and click 'Generate Templates'.");
-  };
-  reader.readAsDataURL(file); 
+    alert("Custom template uploaded in HD. Now choose language and click 'Generate Templates'.");
+  } catch (err) {
+    console.error("Custom template upload failed:", err);
+    alert("❌ Error loading custom template: " + err.message);
+  }
 });
 
 /* ---------- Two-template support: primary + secondary (local language) ---------- */
@@ -840,14 +979,6 @@ function clearGeneratedTemplates() {
   });
 }
 
-
-
-
-
-
-
-
-
 /* Upload handlers (primary + secondary) */
 function updateTemplatePreviews() {
   const primaryBox = document.getElementById('primaryTemplateBox');
@@ -859,11 +990,6 @@ function updateTemplatePreviews() {
     secondaryBox.innerHTML = TEMPLATE_BG_SECONDARY ? `<img src="${TEMPLATE_BG_SECONDARY}" alt="Secondary Template" style="max-width:100%; max-height:110px;">` : '';
   }
 }
-
-
-
-
-
 // Create preview + generated subcontainers (idempotent)
 (function ensurePreviewAndGeneratedContainers() {
   const root = document.getElementById('templatesContainer');
@@ -1701,6 +1827,76 @@ function makeAddressVisible(scope = document) {
 
 window.addEventListener('load', () => setTimeout(() => makeAddressVisible(document), 120));
 window.addEventListener('resize', () => setTimeout(() => makeAddressVisible(document), 120));
+
+
+
+async function downloadTemplateWithLang(which) {
+  const isPrimary = which === 'primary';
+
+  // pick the correct box you’re exporting
+  const box = isPrimary
+    ? (document.getElementById("templateClonePrimary") || document.getElementById("templateBox"))
+    : (document.getElementById("templateCloneSecondary") || document.getElementById("templateBox"));
+
+  if (!box) {
+    alert("No template box found to export.");
+    return;
+  }
+
+  // make sure contact icon span + <img> exists in this box
+  ensureContactIconAfterSeparator(box);
+
+  // use current footer color (same as live preview)
+  const footerColorInput = document.getElementById("footerTextColor");
+  const footerColor = (footerColorInput && footerColorInput.value) ? footerColorInput.value : "#000000";
+
+  // inline SVG → data URL + recolor ring
+  await inlineSvgAsDataUrl(`#${box.id} .contact-icon img`, {
+    preferDataUrl: true,
+    color: footerColor
+  });
+
+  // convert SVG data URLs (if any) to PNG for html2canvas
+  await convertSvgImagesToPng(`#${box.id} .contact-icon img`, 28);
+
+  // render the visible box (with background + footer + icon)
+  const canvas = await html2canvas(box, {
+    scale: 4,
+    useCORS: true,
+    backgroundColor: "#ffffff"
+  });
+
+  const imgData = canvas.toDataURL("image/jpeg", 0.95);
+
+  // create A4 PDF
+  if (!window.jspdf || !window.jspdf.jsPDF) {
+    alert("❌ PDF library (jsPDF) not loaded. Please refresh the page.");
+    return;
+  }
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF("p", "mm", "a4");
+
+  const pdfWidth = 210;
+  const pdfHeight = (canvas.height / canvas.width) * pdfWidth;
+  pdf.addImage(imgData, "JPEG", 0, 0, pdfWidth, pdfHeight);
+
+  // build filename from address
+  const footer = box.querySelector("#storeFooterName, #storeFooterNameFinal");
+  let name = isPrimary ? "Primary" : "Secondary";
+
+  if (footer) {
+    const addrEl = footer.querySelector(".store-address");
+    if (addrEl && addrEl.textContent.trim()) {
+      name = addrEl.textContent
+        .trim()
+        .substring(0, 40)
+        .replace(/[^a-zA-Z0-9]+/g, "_");
+    }
+  }
+
+  const suffix = isPrimary ? "_EN" : "_LOCAL";
+  pdf.save(`${name || 'Template'}${suffix}.pdf`);
+}
 
 async function downloadSuperHDA4() {
   try {
