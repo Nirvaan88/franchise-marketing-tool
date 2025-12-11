@@ -7,11 +7,15 @@
 
 
  .header-area{
-    width: 100%;
-    background-color: hsl(240, 30%, 89%);
-    padding: 40px 0;
-    text-align: center;
-}
+  width: 100%;
+  background-color: hsl(240, 30%, 89%);
+  padding: 5px 0 10px; /* even less bottom padding to pull content up */
+  text-align: center;
+ }
+
+ .header-area h1{
+   margin: 0; /* remove extra space below the heading */
+ }
 
 </style>
 
@@ -27,7 +31,7 @@
 
 <div class="header-area">
   <img src="{{ url_for('static', filename='images/kisna.png') }}"
-       style="width:200px; display:block; margin:0 auto 20px;"
+  style="width:200px; display:block; margin:0 auto 10px;"
        alt="Kisna Logo">
   <!-- <h1>Marketing Template Editor</h1> -->
    <h1 style="color:#002366;">Marketing Template Editor</h1>
@@ -159,103 +163,6 @@
 <h2 style="width:100%; max-width:1200px; margin-left: calc(50% - 600px);">Banners</h2>
 <div class="thumbnail-slider" id="bannerSlider" style="width:100%; max-width:1200px;"></div>
 <script src="/static/js/marketing-template.js"></script>
-
-
-<script>
-
-  // your old JS code here
-  // your preview rendering code here
-
-  /* ---- PASTE HERE ---- */
-
-  async function downloadTemplateWithLang(kind = 'primary') {
-    const templateBox = document.getElementById('templateBox');
-    const footerPrimary = document.getElementById('storeFooterName');
-    const footerLegacy = document.getElementById('storeFooter');
-
-    const footerInputs = {
-      name: (document.getElementById('footerName')?.value || '').trim(),
-      phone: (document.getElementById('footerWhatsApp')?.value || '').trim()
-    };
-
-    const existingFooter = footerPrimary && footerPrimary.innerHTML.trim()
-      ? footerPrimary
-      : (footerLegacy && footerLegacy.innerHTML.trim() ? footerLegacy : null);
-
-    const currentHtml = existingFooter && existingFooter.innerHTML.trim()
-      ? existingFooter.innerHTML
-      : `<span class="store-address">${escapeHtml(footerInputs.name || 'Store Name')}</span>${buildContactSegment(footerInputs.phone || '')}`;
-
-    const currentLang = existingFooter?.getAttribute('lang') || footerPrimary?.getAttribute('lang') || footerLegacy?.getAttribute('lang') || 'en';
-    const currentFont = existingFooter?.style?.fontFamily || footerPrimary?.style?.fontFamily || footerLegacy?.style?.fontFamily || "'Noto Sans', 'Arial', sans-serif";
-
-    [footerPrimary, footerLegacy].forEach(el => {
-      if (!el) return;
-      el.innerHTML = currentHtml;
-      el.style.display = "inline-flex";
-      el.style.alignItems = "center";
-      el.style.justifyContent = "center";
-      el.style.whiteSpace = "nowrap";
-      el.style.pointerEvents = "none";
-      el.setAttribute('lang', currentLang);
-      el.style.fontFamily = currentFont;
-    });
-
-    syncFinalLayerFor(templateBox);
-    runFooterFixes(templateBox);
-
-    await inlineSvgAsDataUrl('#storeFooterName .contact-icon img', { preferDataUrl: true });
-    await inlineSvgAsDataUrl('#storeFooterNameFinal .contact-icon img', { preferDataUrl: true });
-    await inlineSvgAsDataUrl('#storeFooter .contact-icon img', { preferDataUrl: true });
-    await convertSvgImagesToPng('#storeFooterName .contact-icon img');
-    await convertSvgImagesToPng('#storeFooterNameFinal .contact-icon img');
-    await convertSvgImagesToPng('#storeFooter .contact-icon img');
-
-    runFooterFixes(templateBox);
-
-    if (document.fonts && document.fonts.ready) await document.fonts.ready;
-    await waitForImagesInNode(templateBox, 3000);
-
-    void templateBox.offsetHeight;
-    await new Promise(r => setTimeout(r, 150));
-
-    const canvas = await html2canvas(templateBox, {
-      scale: 2,
-      useCORS: true,
-      allowTaint: false,
-      scrollY: -window.scrollY
-    });
-
-    const imgData = canvas.toDataURL('image/png');
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF({ unit: 'pt', format: 'a4' });
-
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const imgWidth = pageWidth;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-    pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-    const filename = (kind === 'primary') ? 'template_primary_english.pdf' : 'template_secondary_local.pdf';
-    pdf.save(filename);
-  }
-
-  function waitForImagesInNode(node, timeout = 3000) {
-    const imgs = Array.from(node.querySelectorAll('img'));
-    if (!imgs.length) return Promise.resolve();
-    return new Promise(resolve => {
-      let remaining = imgs.length;
-      const done = () => { if (--remaining <= 0) resolve(); };
-      imgs.forEach(img => {
-        if (img.complete) done();
-        else { img.addEventListener('load', done); img.addEventListener('error', done); }
-      });
-      setTimeout(resolve, timeout);
-    });
-  }
-
-  /* ---- END PASTE ---- */
-
-</script>
 
 </body>
 </html>

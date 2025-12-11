@@ -2119,12 +2119,19 @@ async function downloadAllPerfectA4() {
       );
       legacyTemplates = Array.from(legacyTemplates).filter(t => t.querySelector(".store-address"));
 
-      if (!legacyTemplates.length) {
-        alert("❌ No templates found.\nPlease click 'Generate Templates' first.");
-        return;
+      if (legacyTemplates.length) {
+        // existing behaviour: use any generated templates inside templatesContainer
+        storeGroups = legacyTemplates.map((node, idx) => ({ storeIndex: idx, nodes: [node] }));
+      } else {
+        // NEW: fallback to the main editor box so a single-page
+        // Perfect A4 PDF can be created after Upload Custom Template
+        const mainBox = document.getElementById("templateBox");
+        if (!mainBox) {
+          alert("❌ No templates found.\nPlease click 'Generate Templates' or upload a template first.");
+          return;
+        }
+        storeGroups = [{ storeIndex: 0, nodes: [mainBox] }];
       }
-
-      storeGroups = legacyTemplates.map((node, idx) => ({ storeIndex: idx, nodes: [node] }));
     }
 
     const totalPdfCount = storeGroups.reduce((sum, group) => sum + group.nodes.length, 0);
