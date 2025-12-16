@@ -721,9 +721,6 @@ function runFooterFixes(scope = document) {
   }
 }
 
-
-
-
 window.addEventListener('load', async () => {
   // if footer color chosen, use it to recolor the SVG ring
   const footerColor = (document.getElementById('footerTextColor') && document.getElementById('footerTextColor').value) || null;
@@ -2165,6 +2162,10 @@ async function downloadAllPerfectA4() {
     for (let storeIdx = 0; storeIdx < storeGroups.length; storeIdx++) {
       const group = storeGroups[storeIdx];
 
+      // one multi-page PDF per store
+      let storePdf = null;
+      let baseAddressForName = "";
+
       for (let variantIdx = 0; variantIdx < group.nodes.length; variantIdx++) {
         const box = group.nodes[variantIdx];
 
@@ -2184,6 +2185,10 @@ async function downloadAllPerfectA4() {
         const footerFullText = hasPhone
           ? `${footerAddress} | ${phoneText}`
           : footerAddress;
+
+        if (variantIdx === 0 && footerAddress) {
+          baseAddressForName = footerAddress;
+        }
 
         const hasDeva     = /[\u0900-\u097F]/.test(footerFullText);
         const hasTamil    = /[\u0B80-\u0BFF]/.test(footerFullText);
@@ -2430,21 +2435,28 @@ async function downloadAllPerfectA4() {
         }
 
         const imgData = canvas.toDataURL("image/jpeg", 0.95);
-        const pdf = new jsPDF("p", "mm", "a4");
-        pdf.addImage(imgData, "JPEG", 0, 0, 210, 297);
 
-        let fname = "Template";
-        if (address && address.trim()) {
-          fname = address.trim().substring(0, 40).replace(/[^a-zA-Z0-9]+/g, "_");
+        // build a single multi-page PDF per store (EN page first, then local)
+        if (!storePdf) {
+          storePdf = new jsPDF("p", "mm", "a4");
+        } else {
+          storePdf.addPage();
         }
+        storePdf.addImage(imgData, "JPEG", 0, 0, 210, 297);
 
-        const langSuffix = langCode ? `_${langCode.toUpperCase()}` : "";
-        const pdfName = `${fname || "Template"}${langSuffix}_PerfectA4.pdf`;
         langCounts[langCode] = (langCounts[langCode] || 0) + 1;
 
-        pdf.save(pdfName);
-
         await new Promise(r => setTimeout(r, 150));
+      }
+
+      // after processing all variants for this store, save exactly one PDF
+      if (storePdf) {
+        let fname = "Template";
+        if (baseAddressForName && baseAddressForName.trim()) {
+          fname = baseAddressForName.trim().substring(0, 40).replace(/[^a-zA-Z0-9]+/g, "_");
+        }
+        const pdfName = `${fname || "Template"}_PerfectA4.pdf`;
+        storePdf.save(pdfName);
       }
     }
 
