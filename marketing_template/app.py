@@ -55,9 +55,6 @@ def listing():
     products = load_products()         # load products from data.json
     return render_template("listing.html", products=products)
 
-
-
-
 # Upload Primary and Secondary Template: display one below the other
 @app.route("/upload_primary_secondary", methods=["GET", "POST"])
 def upload_primary_secondary():
