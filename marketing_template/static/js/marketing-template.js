@@ -170,11 +170,19 @@ function normalizeLangCode(code) {
   if (code == null) return "";
   const raw = String(code).trim().toLowerCase();
   if (!raw) return "";
-  if (LANG_CODE_ALIASES[raw]) return LANG_CODE_ALIASES[raw];
+  if (LANG_CODE_ALIASES[raw]) {
+    const mapped = LANG_CODE_ALIASES[raw];
+    return mapped === "en" ? "en" : "en"; // force all mapped languages to English
+  }
   const cleaned = raw.replace(/[^a-z]/g, "");
-  if (LANG_CODE_ALIASES[cleaned]) return LANG_CODE_ALIASES[cleaned];
+  if (LANG_CODE_ALIASES[cleaned]) {
+    const mappedClean = LANG_CODE_ALIASES[cleaned];
+    return mappedClean === "en" ? "en" : "en"; // force cleaned aliases to English
+  }
   if (!cleaned) return "";
-  return cleaned.length <= 3 ? cleaned : cleaned.slice(0, 3);
+  const base = cleaned.length <= 3 ? cleaned : cleaned.slice(0, 3);
+  // If anything other than explicit 'en' is requested, fall back to English
+  return base === "en" ? "en" : "en";
 }
 
 function detectLangCodeFromText(text) {
@@ -1218,6 +1226,9 @@ async function generateTemplatesFromSheet() {
     already.add(lower);
   });
 
+  // Disable creation of separate local-language templates; only English templates should be generated
+  langColumns.length = 0;
+
   // create templates
   rows.forEach((store, i) => {
     // English clone
@@ -1549,7 +1560,7 @@ async function generateTemplatesFromUploadedTemplate({ selectedState = "" } = {}
     alert("Please upload Excel first.");
     return;
   }
-  const lang = document.getElementById("languageSelect").value || "en";
+  const lang = "en"; // force templates to be generated only in English
   const container = document.getElementById("templatesContainer");
   // container.innerHTML = "";
   clearGeneratedTemplates();

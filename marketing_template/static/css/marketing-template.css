@@ -185,7 +185,7 @@ h1 {
 #storeFooterName,
 #storeFooterNameFinal {
   position: absolute;
-  bottom: 55px !important;
+  bottom: 25px !important;
   left: 50% !important;
   transform: translateX(-55%) !important;
   display: inline-flex !important;
