@@ -1953,7 +1953,15 @@ async function downloadSuperHDA4() {
     ctx.font = "bold 48px Arial";
     ctx.textAlign = "left";
     ctx.textBaseline = "middle";
-    ctx.fillText(footerText, A4_WIDTH / 2, A4_HEIGHT - 80);
+
+    // Shift footer text further down on the A4 download (approx. 10mm)
+    const DPI = 300; // canvas is sized for ~300 DPI A4
+    const shiftMm = 10; // requested ~10mm downward shift
+    const shiftPx = (shiftMm * DPI) / 25.4;
+    const baseY = A4_HEIGHT - 80 + shiftPx;
+    const footerY = Math.min(A4_HEIGHT - 5, baseY); // keep a small bottom margin
+
+    ctx.fillText(footerText, A4_WIDTH / 2, footerY);
 
     const finalImg = canvas.toDataURL("image/jpeg", 0.95);
 
@@ -2371,7 +2379,12 @@ async function downloadAllPerfectA4() {
           fontSize -= 1.5;
         }
 
-        const footerY = A4_H * footerRatioY + 30;
+        // Shift footer further down in Perfect A4 export (~16mm total)
+        const DPI_A4 = 300; // canvas sized for ~300 DPI
+        const shiftMmA4 = 16; // previously 13mm, now +3mm more
+        const shiftPxA4 = (shiftMmA4 * DPI_A4) / 25.4;
+        const rawFooterY = A4_H * footerRatioY + 50 + shiftPxA4;
+        const footerY = Math.min(A4_H - 20, rawFooterY); // keep small bottom margin
 
         ctx.font = `900 ${fontSize}px "${fontFamily}", "NotoSans", Arial, sans-serif`;
         ctx.fillStyle = footerTextColor;
@@ -2387,7 +2400,8 @@ async function downloadAllPerfectA4() {
         const iconSize = (contactIconLoaded && hasPhone) ? fontSize + 6 : 0;
         const totalWidth = addressWidth + iconSize + iconGap + phoneWidth;
 
-        const startX = Math.round((A4_W - totalWidth) / 2)-120;
+        // Tiny additional shift to the right on Perfect A4 PDF
+        const startX = Math.round((A4_W - totalWidth) / 2) + 25;
         let x = startX;
 
         ctx.strokeText(addressPart, x, footerY);

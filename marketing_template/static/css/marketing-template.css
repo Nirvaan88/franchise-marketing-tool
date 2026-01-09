@@ -182,13 +182,13 @@ h1 {
 }
 
 /* force all footers a bit more left — quick override */
-#storeFooterName,
+/* #storeFooterName,
 #storeFooterNameFinal {
   position: absolute;
   bottom: 25px !important;
   left: 50% !important;
-  transform: translateX(-55%) !important;
-  display: inline-flex !important;
+  transform: translateX(-24%) !important; /* shift even more to the right */
+  /* display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
   text-align: center !important;
@@ -200,7 +200,32 @@ h1 {
   font-size: 18px !important;
   color: #000 !important;
   font-weight: 900 !important;
+} */ */
+
+
+#storeFooterName,
+#storeFooterNameFinal {
+  position: absolute;
+  bottom: -10mm !important;
+  left: 50% !important;
+  transform: translateX(-35%) !important; /* shift to the right */
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+  width: max-content;
+  max-width: 92%;
+  gap: 4px !important;
+  font-size: 18px !important;
+  color: #000 !important;
+  font-weight: 900 !important;
 }
+
+
+
+
+
 
 /* Address styling */
 #storeFooterName .store-address,
