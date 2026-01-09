@@ -2400,8 +2400,8 @@ async function downloadAllPerfectA4() {
         const iconSize = (contactIconLoaded && hasPhone) ? fontSize + 6 : 0;
         const totalWidth = addressWidth + iconSize + iconGap + phoneWidth;
 
-        // Tiny additional shift to the right on Perfect A4 PDF
-        const startX = Math.round((A4_W - totalWidth) / 2) + 25;
+        // Perfect centering of footer line (address + icon + phone)
+        const startX = Math.round((A4_W - totalWidth) / 2);
         let x = startX;
 
         ctx.strokeText(addressPart, x, footerY);
