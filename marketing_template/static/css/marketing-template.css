@@ -142,7 +142,7 @@ h1 {
 #storeFooterName,
 #storeFooterNameFinal {
   position: absolute;
-  bottom: 88px !important;
+  bottom: 48px !important;
   left: 50%;
   transform: translateX(-52%);
   text-align: center;
