@@ -1867,43 +1867,63 @@ async function downloadTemplateWithLang(which) {
   // convert SVG data URLs (if any) to PNG for html2canvas
   await convertSvgImagesToPng(`#${box.id} .contact-icon img`, 28);
 
-  // render the visible box (with background + footer + icon)
-  const canvas = await html2canvas(box, {
-    scale: 4,
-    useCORS: true,
-    backgroundColor: "#ffffff"
+  const exportAddressTweaks = [];
+  box.querySelectorAll('#storeFooterName .store-address, #storeFooterNameFinal .store-address').forEach(addr => {
+    exportAddressTweaks.push({
+      el: addr,
+      prevPosition: addr.style.position,
+      prevTop: addr.style.top
+    });
+    addr.style.setProperty('position', 'relative', 'important');
+    addr.style.setProperty('top', '-4px', 'important');
   });
+  try {
+    // render the visible box (with background + footer + icon)
+    const canvas = await html2canvas(box, {
+      scale: 4,
+      useCORS: true,
+      backgroundColor: "#ffffff"
+    });
 
-  const imgData = canvas.toDataURL("image/jpeg", 0.95);
+    const imgData = canvas.toDataURL("image/jpeg", 0.95);
 
-  // create A4 PDF
-  if (!window.jspdf || !window.jspdf.jsPDF) {
-    alert("❌ PDF library (jsPDF) not loaded. Please refresh the page.");
-    return;
-  }
-  const { jsPDF } = window.jspdf;
-  const pdf = new jsPDF("p", "mm", "a4");
-
-  const pdfWidth = 210;
-  const pdfHeight = (canvas.height / canvas.width) * pdfWidth;
-  pdf.addImage(imgData, "JPEG", 0, 0, pdfWidth, pdfHeight);
-
-  // build filename from address
-  const footer = box.querySelector("#storeFooterName, #storeFooterNameFinal");
-  let name = isPrimary ? "Primary" : "Secondary";
-
-  if (footer) {
-    const addrEl = footer.querySelector(".store-address");
-    if (addrEl && addrEl.textContent.trim()) {
-      name = addrEl.textContent
-        .trim()
-        .substring(0, 40)
-        .replace(/[^a-zA-Z0-9]+/g, "_");
+    // create A4 PDF
+    if (!window.jspdf || !window.jspdf.jsPDF) {
+      alert("❌ PDF library (jsPDF) not loaded. Please refresh the page.");
+      return;
     }
-  }
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF("p", "mm", "a4");
 
-  const suffix = isPrimary ? "_EN" : "_LOCAL";
-  pdf.save(`${name || 'Template'}${suffix}.pdf`);
+    const pdfWidth = 210;
+    const pdfHeight = (canvas.height / canvas.width) * pdfWidth;
+    pdf.addImage(imgData, "JPEG", 0, 0, pdfWidth, pdfHeight);
+
+    // build filename from address
+    const footer = box.querySelector("#storeFooterName, #storeFooterNameFinal");
+    let name = isPrimary ? "Primary" : "Secondary";
+
+    if (footer) {
+      const addrEl = footer.querySelector(".store-address");
+      if (addrEl && addrEl.textContent.trim()) {
+        name = addrEl.textContent
+          .trim()
+          .substring(0, 40)
+          .replace(/[^a-zA-Z0-9]+/g, "_");
+      }
+    }
+
+    const suffix = isPrimary ? "_EN" : "_LOCAL";
+    pdf.save(`${name || 'Template'}${suffix}.pdf`);
+  } finally {
+    exportAddressTweaks.forEach(({ el, prevPosition, prevTop }) => {
+      if (prevPosition) el.style.setProperty('position', prevPosition);
+      else el.style.removeProperty('position');
+
+      if (prevTop) el.style.setProperty('top', prevTop);
+      else el.style.removeProperty('top');
+    });
+  }
 }
 
 async function downloadSuperHDA4() {
@@ -2379,12 +2399,14 @@ async function downloadAllPerfectA4() {
           fontSize -= 1.5;
         }
 
-        // Shift footer further down in Perfect A4 export (~16mm total)
+        // Base footer placement in Perfect A4 export
         const DPI_A4 = 300; // canvas sized for ~300 DPI
-        const shiftMmA4 = 16; // previously 13mm, now +3mm more
+        const shiftMmA4 = 16;
         const shiftPxA4 = (shiftMmA4 * DPI_A4) / 25.4;
+        const footerNudgeUpPx = 175; // move footer/store-address slightly more upward in Download All A4 export
         const rawFooterY = A4_H * footerRatioY + 50 + shiftPxA4;
-        const footerY = Math.min(A4_H - 20, rawFooterY); // keep small bottom margin
+        const cappedFooterY = Math.min(A4_H - 20, rawFooterY); // keep small bottom margin
+        const footerY = Math.max(0, cappedFooterY - footerNudgeUpPx);
 
         ctx.font = `900 ${fontSize}px "${fontFamily}", "NotoSans", Arial, sans-serif`;
         ctx.fillStyle = footerTextColor;
