@@ -185,6 +185,191 @@ h1 {
   cursor: pointer;
 }
 
+.upload-files-section {
+  margin: 10px 0 14px;
+  padding: 14px;
+  border: 1px solid #dfe7f3;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #f9fbff 0%, #f4f7fc 100%);
+}
+
+.upload-files-title {
+  margin: 0 0 12px;
+  font-size: 24px;
+  color: #263763;
+  font-weight: 700;
+}
+
+.upload-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.upload-card {
+  background: #f8fbff;
+  border: 1px solid #d9e3f2;
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.upload-card-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.upload-card-icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.upload-card-heading label {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #2b3d67;
+}
+
+.upload-input-shell {
+  border: 1px solid #cfdaec;
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 6px;
+}
+
+.upload-card input[type="file"] {
+  width: 100%;
+  border-radius: 8px;
+  border: 0;
+  background: #ffffff;
+  padding: 0;
+}
+
+.upload-card input[type="file"]::file-selector-button {
+  border: 1px solid #c8d5ea;
+  background: #edf2ff;
+  color: #29406f;
+  border-radius: 7px;
+}
+
+.upload-card input[type="file"]::-webkit-file-upload-button {
+  border: 1px solid #c8d5ea;
+  background: #edf2ff;
+  color: #29406f;
+  border-radius: 7px;
+}
+
+.footer-customization-section {
+  margin-top: 8px;
+  border: 1px solid #dfe7f3;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #f8fbff;
+}
+
+.footer-customization-title {
+  margin: 0;
+  padding: 14px 18px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #263763;
+  background: linear-gradient(180deg, #f5f8fe 0%, #edf2fb 100%);
+  border-bottom: 1px solid #e3eaf5;
+}
+
+.footer-customization-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(260px, 1fr));
+  gap: 16px;
+  padding: 16px 18px 8px;
+}
+
+.footer-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.footer-field label {
+  font-size: 14px;
+  font-weight: 700;
+  color: #2a3a61;
+}
+
+.footer-input-shell {
+  border: 1px solid #ced9eb;
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 5px 7px;
+}
+
+.footer-field input[type="text"] {
+  width: 100%;
+  border: 0;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 14px;
+  color: #1f2f53;
+  background: transparent;
+}
+
+.whatsapp-color-wrap {
+  position: relative;
+}
+
+.whatsapp-color-wrap input[type="text"] {
+  padding-right: 52px;
+}
+
+.whatsapp-color-wrap input[type="color"] {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 30px;
+  height: 30px;
+  border: 1px solid #cf9e49;
+  border-radius: 7px;
+  padding: 0;
+  background: #d8a23f;
+  cursor: pointer;
+}
+
+.footer-action-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 18px 16px;
+  flex-wrap: wrap;
+}
+
+.footer-action-left,
+.footer-action-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.controls .btn-success {
+  background: linear-gradient(90deg, #43b27a 0%, #2f9b64 100%);
+  box-shadow: 0 4px 12px rgba(58, 163, 113, 0.28);
+}
+
+.controls .btn-light {
+  background: #f2f5fb;
+  color: #314267;
+  border: 1px solid #d6dfef;
+  box-shadow: none;
+}
+
+.controls .btn-light:hover {
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
 .status-pill {
   min-height: 20px;
   display: inline-flex;
@@ -341,6 +526,36 @@ h1 {
   .template-upload-grid {
     grid-template-columns: 1fr;
   }
+
+  .upload-cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .upload-files-title {
+    font-size: 20px;
+  }
+
+  .footer-customization-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .footer-customization-title {
+    font-size: 24px;
+  }
+
+  .footer-field label,
+  .footer-field input[type="text"] {
+    font-size: 16px;
+  }
+
+  .footer-action-left,
+  .footer-action-right {
+    width: 100%;
+  }
+
+  .footer-action-right .btn-dark {
+    width: 100%;
+  }
 }
 
 /* initial store-address style (kept same) */
@@ -476,7 +691,7 @@ h1 {
   position: absolute;
   bottom: -10mm !important;
   left: 50% !important;
-  transform: translateX(-35%) !important; /* shift to the right */
+  transform: translateX(-41%) !important; /* moved further left */
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -510,7 +725,7 @@ h1 {
 /* Remove left shift for long addresses - keep everything centered */
 #storeFooterName.long,
 #storeFooterNameFinal.long {
-  transform: translateX(-50%) !important;
+  transform: translateX(-56%) !important;
 }
 
 /* Separator (pipe) — keep fixed size and inline */

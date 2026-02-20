@@ -66,54 +66,89 @@
         </div>
       </div>
 
-      <div class="control-row">
-        <label for="storesExcel">Upload Stores Excel (.xlsx/.xls/.csv):</label>
-        <input type="file" id="storesExcel" accept=".xlsx,.xls,.csv">
-      </div>
+      <section class="upload-files-section">
+        <h3 class="upload-files-title">Upload Files</h3>
 
-      <div class="control-row">
-        <label for="footerTextColor">Footer Text & Logo Color:</label>
-        <input type="color" id="footerTextColor" value="#9A6C0C">
-        <div class="actions-side">
-          <button type="button" onclick="applyFooterColor()">Footer Move</button>
+        <div class="upload-cards-grid">
+          <div class="upload-card">
+            <div class="upload-card-heading">
+              <span class="upload-card-icon">📗</span>
+              <label for="storesExcel">Upload Stores Excel (.xlsx / .xls / .csv)</label>
+            </div>
+            <div class="upload-input-shell">
+              <input type="file" id="storesExcel" accept=".xlsx,.xls,.csv">
+            </div>
+          </div>
+
+          <div class="upload-card">
+            <div class="upload-card-heading">
+              <span class="upload-card-icon">📄</span>
+              <label for="templateUpload">Upload Custom Template</label>
+            </div>
+            <div class="upload-input-shell">
+              <input type="file" id="templateUpload" accept="image/*">
+            </div>
+          </div>
+
+          <div class="upload-card">
+            <div class="upload-card-heading">
+              <span class="upload-card-icon">📄</span>
+              <label for="templateUploadPrimary">Primary Template (English)</label>
+            </div>
+            <div class="upload-input-shell">
+              <input type="file" id="templateUploadPrimary" class="template-upload-small" accept="image/*">
+            </div>
+          </div>
+
+          <div class="upload-card">
+            <div class="upload-card-heading">
+              <span class="upload-card-icon">🌐</span>
+              <label for="templateUploadSecondary">Secondary Template (Local Language)</label>
+            </div>
+            <div class="upload-input-shell">
+              <input type="file" id="templateUploadSecondary" class="template-upload-small" accept="image/*">
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
 
-      <div class="control-row">
-        <label for="footerName">Add Footer Text:</label>
-        <input type="text" id="footerName" placeholder="Store Name">
-        <label for="footerWhatsApp">WhatsApp Number:</label>
-        <input type="text" id="footerWhatsApp" placeholder="WhatsApp Number">
-        <div class="actions-side">
-          <button type="button" onclick="updateFooterInfo()">Update Footer</button>
+      <section class="footer-customization-section">
+        <h3 class="footer-customization-title">Footer Customization</h3>
+
+        <div class="footer-customization-grid">
+          <div class="footer-field">
+            <label for="footerName">Footer Text:</label>
+            <div class="footer-input-shell">
+              <input type="text" id="footerName" placeholder="Store Name">
+            </div>
+          </div>
+
+          <div class="footer-field footer-field-color">
+            <label for="footerWhatsApp">WhatsApp Number:</label>
+            <div class="whatsapp-color-wrap footer-input-shell">
+              <input type="text" id="footerWhatsApp" placeholder="Enter WhatsApp Number">
+              <input type="color" id="footerTextColor" value="#9A6C0C" aria-label="Footer Text & Logo Color">
+            </div>
+          </div>
         </div>
-      </div>
 
-      <div class="control-row">
-        <div class="actions-side">
-          <button onclick="downloadAllPerfectA4()" class="btn-dark">Download Perfect A4 PDF</button>
+        <div class="footer-action-row">
+          <div class="footer-action-left">
+            <button type="button" class="btn-success" onclick="updateFooterInfo()">Update Footer</button>
+            <button type="button" class="btn-light" onclick="applyFooterColor()">Footer Move</button>
+          </div>
+          <div class="footer-action-right">
+            <button onclick="downloadAllPerfectA4()" class="btn-dark">Download Perfect A4 PDF</button>
+          </div>
         </div>
-      </div>
-
-      <div class="control-row">
-        <label for="templateUpload">Upload Custom Template:</label>
-        <input type="file" id="templateUpload" accept="image/*">
-      </div>
+      </section>
 
       <div class="template-upload-grid">
         <div class="template-upload-col">
-          <div class="control-row compact-row">
-            <label for="templateUploadPrimary">Upload Primary Template (English):</label>
-            <input type="file" id="templateUploadPrimary" class="template-upload-small" accept="image/*">
-          </div>
           <div id="primaryTemplateBox" class="preview-box"></div>
         </div>
 
         <div class="template-upload-col">
-          <div class="control-row compact-row">
-            <label for="templateUploadSecondary">Upload Secondary Template (Local language):</label>
-            <input type="file" id="templateUploadSecondary" class="template-upload-small" accept="image/*">
-          </div>
           <div id="secondaryTemplateBox" class="preview-box"></div>
         </div>
       </div>

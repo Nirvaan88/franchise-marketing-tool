@@ -561,7 +561,7 @@ function adjustFooterPosition(){
     else footer.style.bottom = "28px";
     
     footer.style.left = '50%';
-    footer.style.transform = 'translateX(-50%)';
+    footer.style.transform = 'translateX(-56%)';
     footer.style.textAlign = 'center';
     footer.style.maxWidth = '95%';
   });
@@ -613,7 +613,7 @@ function syncFinalLayerFor(box){
     footerFinal.style.position = "absolute";
     footerFinal.style.bottom = "30px";
     footerFinal.style.left = "50%";
-    footerFinal.style.transform = "translateX(-50%)";
+    footerFinal.style.transform = "translateX(-56%)";
     footerFinal.style.zIndex = 20;
     footerFinal.style.pointerEvents = "none";
     box.appendChild(footerFinal);
@@ -2422,8 +2422,9 @@ async function downloadAllPerfectA4() {
         const iconSize = (contactIconLoaded && hasPhone) ? fontSize + 6 : 0;
         const totalWidth = addressWidth + iconSize + iconGap + phoneWidth;
 
-        // Perfect centering of footer line (address + icon + phone)
-        const startX = Math.round((A4_W - totalWidth) / 2);
+        // Footer line position in Download All Perfect A4 export
+        const footerNudgeLeftPx = 80;
+        const startX = Math.round((A4_W - totalWidth) / 2) - footerNudgeLeftPx;
         let x = startX;
 
         ctx.strokeText(addressPart, x, footerY);
