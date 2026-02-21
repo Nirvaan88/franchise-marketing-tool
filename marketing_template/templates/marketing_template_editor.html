@@ -63,6 +63,7 @@
         <div class="actions-side settings-actions">
           <button id="generateStateTemplates">Generate</button>
           <button onclick="clearAllTemplates()" class="btn-danger">Clear</button>
+          <button onclick="downloadAllPerfectA4()" class="btn-dark">Download Perfect A4 PDF</button>
         </div>
       </div>
 
@@ -127,7 +128,6 @@
             <label for="footerWhatsApp">WhatsApp Number:</label>
             <div class="whatsapp-color-wrap footer-input-shell">
               <input type="text" id="footerWhatsApp" placeholder="Enter WhatsApp Number">
-              <input type="color" id="footerTextColor" value="#9A6C0C" aria-label="Footer Text & Logo Color">
             </div>
           </div>
         </div>
@@ -138,7 +138,6 @@
             <button type="button" class="btn-light" onclick="applyFooterColor()">Footer Move</button>
           </div>
           <div class="footer-action-right">
-            <button onclick="downloadAllPerfectA4()" class="btn-dark">Download Perfect A4 PDF</button>
           </div>
         </div>
       </section>
@@ -156,6 +155,10 @@
 
     <section class="panel-card">
       <h2 class="section-title">Live Template</h2>
+      <div style="margin-bottom: 12px;">
+        <label for="footerTextColor">Footer Text Color:</label>
+        <input type="color" id="footerTextColor" value="#9A6C0C" aria-label="Footer Text & Logo Color">
+      </div>
       <div id="templateBox" class="template-box lang-en">
         <div id="storeFooterName">Default Store Name</div>
         <div id="storeFooter"></div>
