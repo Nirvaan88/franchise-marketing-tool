@@ -250,7 +250,11 @@ function makeDraggable(el) {
 const CONTACT_ICON_BASE64 = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB2ZXJzaW9uPSIxLjEiIGlkPSJMYXllcl8xIiB4PSIwcHgiIHk9IjBweCIgd2lkdGg9IjEwMCUiIHZpZXdCb3g9IjAgMCA4MjAgODYxIiBlbmFibGUtYmFja2dyb3VuZD0ibmV3IDAgMCA4MjAgODYxIiB4bWw6c3BhY2U9InByZXNlcnZlIj4NCjxwYXRoIGZpbGw9IiNmZmZmZmYiIG9wYWNpdHk9IjEuMDAwMDAwIiBzdHJva2U9Im5vbmUiIGQ9IiBNNDI1LjAwMDAwMCw4NjIuMDAwMDAwICAgQzI4My4zMzMzNzQsODYyLjAwMDAwMCAxNDIuMTY2NzQ4LDg2Mi4wMDAwMDAgMS4wMDAwOTUsODYyLjAwMDAwMCAgIEMxLjAwMDA2Myw1NzUuMDAwMTIyIDEuMDAwMDYzLDI4OC4wMDAyNDQgMS4wMDAwMzIsMS4wMDAyODcgICBDMjc0LjMzMzEzMCwxLjAwMDE5MSA1NDcuNjY2MjYwLDEuMDAwMTkxIDgyMC45OTk1MTIsMS4wMDAwOTYgICBDODIwLjk5OTY5NSwyODcuOTk5NzI1IDgyMC45OTk2OTUsNTc0Ljk5OTQ1MSA4MjAuOTk5ODc4LDg2MS45OTk1NzMgICBDNjg5LjE2NjY4Nyw4NjIuMDAwMDAwIDU1Ny4zMzMzMTMsODYyLjAwMDAwMCA0MjUuMDAwMDAwLDg2Mi4wMDAwMDAgIE00NTQuMDI5MDUzLDgzOS42NDE0NzkgICBDNDczLjAwMTAzOCw4MzYuMTIzNjU3IDQ5Mi4yMjc2NjEsODMzLjYxOTY5MCA1MTAuOTA0OTM4LDgyOC45Mjg0NjcgICBDNjY3LjgwMDUzNyw3ODkuNTIxMDU3IDc4Ni43OTUyMjcsNjU2LjA4NTI2NiA4MDcuODU2Njg5LDQ5NS4yNzAyNjQgICBDODE2LjUxOTcxNCw0MjkuMTIzMTk5IDgwOS40MTA5NTAsMzY0LjQxOTQ5NSA3ODYuMDI2MzY3LDMwMS41NzYyNjMgICBDNzIxLjA3NDI4MCwxMjcuMDI1MzA3IDU0Mi40NjA4NzYsMTguOTI0MTkyIDM1NC4xOTg0ODYsNDYuMDAyNTIyICAgQzI3My4wMzAwMjksNTcuNjc3MjEyIDIwMS4wMDI4MjMsOTAuMjE4NzE5IDE0MS4yNzQzMjMsMTQ2LjczNzI0NCAgIEMzMS4wMTg1NjIsMjUxLjA2NzU4MSAtOS44NzA2MjksMzc5LjA5NzcxNyAyMC4zNTAxODUsNTI3LjM4MjY5MCAgIEM1My44NjkyOTcsNjkxLjg1MTQ0MCAxOTIuODY3MTU3LDgxNy41MTQzNDMgMzU5Ljc3MTk0Miw4MzguODYzMjIwICAgQzM5MC44MDM4MDIsODQyLjgzMjUyMCA0MjEuOTczOTk5LDg0MS41NTc5MjIgNDU0LjAyOTA1Myw4MzkuNjQxNDc5ICB6Ii8+DQo8cGF0aCBmaWxsPSIjMDAwMDAwIiBvcGFjaXR5PSIxLjAwMDAwMCIgc3Ryb2tlPSJub25lIiBkPSIgTTQ1My41NjczNTIsODM5LjY3NzEyNCAgIEM0MjEuOTczOTk5LDg0MS41NTc5MjIgMzkwLjgwMzgwMiw4NDIuODMyNTIwIDM1OS43NzE5NDIsODM4Ljg2MzIyMCAgIEMxOTIuODY3MTU3LDgxNy41MTQzNDMgNTMuODY5Mjk3LDY5MS44NTE0NDAgMjAuMzUwMTg1LDUyNy4zODI2OTAgICBDLTkuODcwNjI5LDM3OS4wOTc3MTcgMzEuMDE4NTYyLDI1MS4wNjc1ODEgMTQxLjI3NDMyMywxNDYuNzM3MjQ0ICAgQzIwMS4wMDI4MjMsOTAuMjE4NzE5IDI3My4wMzAwMjksNTcuNjc3MjEyIDM1NC4xOTg0ODYsNDYuMDAyNTIyICAgQzU0Mi40NjA4NzYsMTguOTI0MTkyIDcyMS4wNzQyODAsMTI3LjAyNTMwNyA3ODYuMDI2MzY3LDMwMS41NzYyNjMgICBDODA5LjQxMDk1MCwzNjQuNDE5NDk1IDgxNi41MTk3MTQsNDI5LjEyMzE5OSA4MDcuODU2Njg5LDQ5NS4yNzAyNjQgICBDNzg2Ljc5NTIyNyw2NTYuMDg1MjY2IDY2Ny44MDA1MzcsNzg5LjUyMTA1NyA1MTAuOTA0OTM4LDgyOC45Mjg0NjcgICBDNDQ1LjI1MjA3NSw2NzMuNjU2MTI4IDQ3Mi41Njk2MTEsNjg2LjI1MDczMiA1MDMuNzU0MDU5LDY4OC41MjY3MzMgICBDNTM4LjAyNjYxMSw2OTEuMDI4MDc2IDU2Ni45MTgyNzQsNjc5LjI3NTQ1MiA1OTEuMTY3NjAzLDY1NS43MTY3OTcgICBDNjA0Ljg2OTYyOSw2NDIuNDA1MDkwIDYwNi41MzUyNzgsNjI4LjkwOTYwNyA1OTYuNzg5Nzk1LDYxMy4zNjE1NzIgICBDNTg1LjIxNDQ3OCw1OTQuODk0MDQzIDU3MS4wMDU2MTUsNTc4LjU4NjMwNCA1NTMuNzYzMzY3LDU2NS4xMDYyNjIgICBDNTMzLjgxMjI1Niw1NDkuNTA4MzYyIDUxMi41NTM0MDYsNTQ3LjcyOTE4NyA0OTEuMTAzMDg4LDU2MS4xNjQzMDcgICBDNDc5LjE2NzYwMyw1NjguNjM5OTU0IDQ2OC4zMjUyNTYsNTc3Ljg4MDI0OSA0NTcuMTEzMzEyLDU4Ni40ODU1OTYgICBDNDQ3LjQwMjAzOSw1OTMuOTM5MjA9IDQ0Ni45MTAxODcsNTk0LjY5OTg5MCA0MzcuNTczMjQyLDU4Ni42NjQ0OTAgICBDNDIyLjA3MDg2Miw1NzMuMzIzMTIwIDQwNy4zODE1MzEsNTU5LjAzNjk4NyAzOTEuODYyMDkxLDU0NC42MzQ1MjEgIHoiLz4NCjxwYXRoIGZpbGw9IiNmZmZmZmYiIG9wYWNpdHk9IjEuMDAwMDAwIiBzdHJva2U9Im5vbmUiIGQ9IiBNMzkyLjEwNTg5Niw1NDQuODkxNjYzICAgQzQwNy4zODE1MzEsNTU5LjAzNjk4NyA0MjIuMDcwODYyLDU3My4zMjMxMjAgNDM3LjU3MzI0Miw1ODYuNjY0NDkwICAgQzQ0Ni45MTAxODcsNTk0LjY5OTg5MCA0NDcuNDAyMDM5LDU5My45Mzk2MjA5IDQ1Ny4xMTMzMTIsNTg2LjQ4NTU5NiAgIEM0NjguMzI1MjU2LDU3Ny44ODAyNDkgNDc5LjE2NzYwMyw1NjguNjM5OTU0IDQ5MS4xMDMwODgsNTYxLjE2NDMwNyAgIEM1MTIuNTUzNDA2LDU0Ny43MjkxODcgNTMzLjgxMjI1Niw1NDkuNTA4MzYyIDU1My43NjMzNjcsNTY1LjEwNjI2MiAgIEM1NzEuMDA1NjE1LDU3OC41ODYzMDQgNTg1LjIxNDQ3OCw1OTQuODk0MDQzIDU5Ni43ODk3OTUsNjEzLjM2MTU3MiAgIEM2MDYuNTM1Mjc4LDYyOC45MDk2MDcgNjA0Ljg2OTYyOSw2NDIuNDA1MDkwIDU5MS4xNjc2MDMsNjU1LjcxNjc5NyAgIEM1NjYuOTE4Mjc0LDY3OS4yNzU0NTIgNTM4LjAyNjYxMSw2OTEuMDI4MDc2IDUwMy43NTQwNTksNjg4LjUyNjczMyAgIEM0NzIuNTY5NjExLDY4Ni4yNTA3MzIgNDQ1LjI1MjA3NSw2NzMuNjU2MTI4IDQxOS4zMjIxNDQsNjU3LjQ0NTE5MCAgIEMzNzQuNDQyNTk2LDYyOS4zODcyMDcgMzM4LjIyMjQ3Myw1OTIuMTY1NDY2IDMwNy4zNDkxODIsNTQ5LjU5MTMwOSAgIEMyNzMuMjU2NjIyLDUwMi41Nzc4NTAgMjQ2Ljg3NDg5Myw0NTEuNjEzODYxIDIzMC45MDY5ODIsMzk1LjU3NzU3NiAgIEMyMjEuNzkzOTE1LDM2My41OTY5ODUgMjE4LjIyNTA1MiwzMzAuOTQ1MDY4IDIxOS45NzIyMjksMjk3LjcwOTU2NCAgIEMyMjEuMjk2OTUxLDI3Mi41MTAyNTQgMjMxLjk5ODg3MSwyNTEuMTAwNzU0IDI0Ny4zNTM2MjIsMjMxLjkyOTkzMiAgIEMyNTUuMjE4MTU1LDIyMi4xMTA4MjUgMjYzLjk4OTY4NSwyMTIuNzYwODY0IDI3My41Njc4NzEsMjA0LjYzMjQ2MiAgIEMyODcuNjM5MjIxLDE5Mi42OTEwNDAgMzA0LjU2NDIwOSwxOTEuMTU5ODk3IDMxOC41MjY1ODEsMjAwLjI3NTQ5NyAgIEMzMjQuODkxMDgzLDIwNC40MzA3MjUgMzMwLjY5MDc2NSwyMTAuMzU2OTE4IDMzNC45MzQ2MDEsMjE2LjY5MzQyMCAgIEMzNTAuOTY5ODE4LDI0MC42MzU3MTIgMzYwLjI5MDI4MywyNjcuMDE3OTE0IDM2Mi4zMjg3OTYsMjk2LjAxMjc4NyAgIEMzNjIuODI3NjA2LDMwMy4xMDc1NDQgMzYwLjk2NDIwMywzMDcuNDg2NTQyIDM1NS45MjAxMDUsMzEyLjI2ODA2NiAgIEMzNDUuMTExMjAzLDMyMi41MTM1ODAgMzMyLjU2MDgyMiwzMjkuODQwMTQ5IDMxOS42NDI2MDksMzM2LjgyODc5NiAgIEMzMTMuODAyMTU1LDMzOS45ODg0NjQgMzA4LjEwMzE0OSwzNDMuNDg1MDE2IDMwMi42NjQwMDEsMzQ3LjI5MTcxOCAgIEMyOTYuMDUxNTQ0LDM1MS45MTk1ODYgMjkzLjIxNTI0MCwzNTguNTk3MjYwIDI5My4zMDk5MDYsMzY2LjY5NTg2MiAgIEMyOTMuNDc3OTY2LDM4MS4wNjY4OTUgMjk4LjUwMzYzMiwzOTQuMTcyOTQzIDMwNC4yNjU1NjQsNDA2Ljg5NTQ0NyAgIEMzMjYuOTI4MTkyLDQ1Ni45MzUzNjQgMzU1LjI2ODI4MCw1MDMuNDI1MTEwIDM5Mi4xMDU4OTYsNTQ0Ljg5MTY2MyAgeiIvPg0KPC9zdmc+DQ==';
 
 function getContactIconHtml() {
-  return `<span class="contact-icon"><img src="${CONTACT_ICON_BASE64}" alt="phone"></span>`;
+  // Prefer the static SVG file in the app's static images folder.
+  // Fall back to embedded base64 if the file isn't available.
+  const preferred = '/static/images/contact-logo.svg';
+  const src = preferred;
+  return `<span class="contact-icon"><img src="${src}" alt="phone"></span>`;
 }
 
 function buildContactSegment(phoneText) {
@@ -317,8 +321,8 @@ async function inlineSvgAsDataUrl(imgSelector, options = {}) {
     });
   }
 
-  // preferred candidate (application static SVG)
-  const appSvgPath = '/static/images/contact-logo.svg';
+  // preferred candidates (application static SVGs)
+  const appSvgCandidates = ['/static/images/contact-logo.svg'];
 
   // If a forced color is provided, prefer createColoredContactSvg to recolor ring
   const coloredDataUrl = forcedColor ? createColoredContactSvg(forcedColor) : null;
@@ -332,12 +336,16 @@ async function inlineSvgAsDataUrl(imgSelector, options = {}) {
     else if (coloredDataUrl) finalSrc = coloredDataUrl;
   }
 
-  // If no finalSrc yet, test the appSvgPath
+  // If no finalSrc yet, test candidate app SVG paths in order
   if (!finalSrc) {
-    try {
-      const ok = await testLoad(appSvgPath);
-      if (ok) finalSrc = appSvgPath;
-    } catch(e) { /* ignore */ }
+    for (const p of appSvgCandidates) {
+      try {
+        // testLoad returns boolean
+        // eslint-disable-next-line no-await-in-loop
+        const ok = await testLoad(p);
+        if (ok) { finalSrc = p; break; }
+      } catch (e) { /* ignore */ }
+    }
   }
 
   // Fall back to coloredDataUrl or embedded base64
@@ -438,7 +446,8 @@ function updateFooterInfo() {
     adjustFooterPosition();
   }, 40);
 
-  inlineSvgAsDataUrl('.contact-icon img');
+  const footerColorForUpdate = (document.getElementById('footerTextColor') && document.getElementById('footerTextColor').value) || '#000000';
+  inlineSvgAsDataUrl('.contact-icon img', { color: footerColorForUpdate });
 }
 
 /* ---------- Single robust footer font-size function (replaces duplicates) ---------- */
@@ -551,19 +560,38 @@ function setStoreFooterFontSize() {
 }
 
 /* ---------- Footer position ---------- */
-function adjustFooterPosition(){
+// function adjustFooterPosition(){
+//   const footers = document.querySelectorAll("#storeFooterName, #storeFooterNameFinal");
+//   footers.forEach(footer => {
+//     const textLength = footer.textContent.trim().length;
+    
+//     if (textLength < 80) footer.style.bottom = "38px";
+//     else if (textLength < 128) footer.style.bottom = "29px";
+//     else footer.style.bottom = "28px";
+    
+//     footer.style.left = '50%';
+//     footer.style.transform = 'translateX(-56%)';
+//     footer.style.textAlign = 'center';
+//     footer.style.maxWidth = '95%';
+//   });
+// }
+
+
+function adjustFooterPosition() {
+  const selectedMode = document.querySelector('input[name="footer_position"]:checked')?.value;
+
   const footers = document.querySelectorAll("#storeFooterName, #storeFooterNameFinal");
+
   footers.forEach(footer => {
-    const textLength = footer.textContent.trim().length;
-    
-    if (textLength < 80) footer.style.bottom = "38px";
-    else if (textLength < 128) footer.style.bottom = "29px";
-    else footer.style.bottom = "28px";
-    
+
+    // Always center correctly
     footer.style.left = '50%';
-    footer.style.transform = 'translateX(-56%)';
+    footer.style.transform = 'translateX(-50%)';
     footer.style.textAlign = 'center';
     footer.style.maxWidth = '95%';
+
+    // Only adjust bottom for Footer Only mode — keep footer around 120px above bottom
+    footer.style.bottom = "120px";
   });
 }
 
@@ -611,7 +639,8 @@ function syncFinalLayerFor(box){
     footerFinal = document.createElement("div");
     footerFinal.id = "storeFooterNameFinal";
     footerFinal.style.position = "absolute";
-    footerFinal.style.bottom = "30px";
+    // position final overlay around 120px above bottom to match CSS rules
+    footerFinal.style.bottom = "120px";
     footerFinal.style.left = "50%";
     footerFinal.style.transform = "translateX(-56%)";
     footerFinal.style.zIndex = 20;
@@ -643,6 +672,26 @@ function syncFinalLayerFor(box){
     footerFinal.appendChild(sep);
     footerFinal.appendChild(spanPhone);
   }
+  // If this box is a generated clone (inside templatesContainer or generatedTemplates),
+  // hide the original inline footer element and clear its content to avoid duplicate address lines.
+  try {
+    const isGenerated = !!box.closest && (box.closest('#templatesContainer') || box.closest('#generatedTemplates') || (box.id && (box.id.startsWith('template_clone_') || box.id.startsWith('template_pair_') || box.id.startsWith('template_sheet_'))));
+    if (isGenerated) {
+      const srcFooter = box.querySelector('#storeFooterName');
+      if (srcFooter) {
+        // move any remaining inline text to final overlay (if final is empty)
+        if ((!footerFinal || !footerFinal.innerHTML || footerFinal.innerHTML.trim().length === 0) && srcFooter.innerHTML && srcFooter.innerHTML.trim().length) {
+          footerFinal.innerHTML = srcFooter.innerHTML;
+        }
+        srcFooter.innerHTML = '';
+        srcFooter.style.display = 'none';
+      }
+      // ensure the final footer is visible and positioned
+      footerFinal.style.display = 'inline-flex';
+      footerFinal.style.alignItems = 'center';
+      footerFinal.style.justifyContent = 'center';
+    }
+  } catch (e) { /* ignore */ }
 
   ensureContactIconAfterSeparator(box);
 }
@@ -689,8 +738,13 @@ function ensureContactIconAfterSeparator(container = document) {
         existingImg.style.verticalAlign = 'middle';
         existingImg.style.objectFit = 'contain';
         existingImg.style.pointerEvents = 'none';
-        const iconSrc = CONTACT_ICON_BASE64 || '/static/images/contact-logo.svg';
-        if (existingImg.getAttribute('src') !== iconSrc) existingImg.setAttribute('src', iconSrc);
+          // Prefer the static SVG file (with possible "(1)" filename); fall back to embedded base64 if it fails to load
+          const iconSrcPreferred = '/static/images/contact-logo.svg';
+          const chosenSrc = iconSrcPreferred;
+          if (existingImg.getAttribute('src') !== chosenSrc) existingImg.setAttribute('src', chosenSrc);
+          existingImg.onerror = function () {
+            if (CONTACT_ICON_BASE64) existingImg.setAttribute('src', CONTACT_ICON_BASE64);
+          };
       }
       return;
     }
@@ -704,8 +758,10 @@ function ensureContactIconAfterSeparator(container = document) {
 
     const img = document.createElement('img');
     img.alt = 'phone';
-    const iconSrc = CONTACT_ICON_BASE64 || '/static/images/contact-logo.svg';
-    img.setAttribute('src', iconSrc);
+    // Use the repository SVG first (prefer the "(1)" filename); fallback to base64 if loading fails
+    const iconSrcPreferred = '/static/images/contact-logo.svg';
+    img.setAttribute('src', iconSrcPreferred);
+    img.onerror = function () { if (CONTACT_ICON_BASE64) img.setAttribute('src', CONTACT_ICON_BASE64); };
     img.style.width = '18px';
     img.style.height = '18px';
     img.style.display = 'inline-block';
@@ -730,14 +786,35 @@ function runFooterFixes(scope = document) {
 }
 
 window.addEventListener('load', async () => {
-  // if footer color chosen, use it to recolor the SVG ring
-  const footerColor = (document.getElementById('footerTextColor') && document.getElementById('footerTextColor').value) || null;
+  // if footer color chosen, use it to recolor the SVG ring; default to navy for consistent badge color
+  const footerColor = (document.getElementById('footerTextColor') && document.getElementById('footerTextColor').value) || '#000000';
   await inlineSvgAsDataUrl('.contact-icon img', { preferDataUrl: false, color: footerColor });
   setTimeout(() => runFooterFixes(document), 120);
+
+  // --- Debug helpers (non-invasive) ---
+  try {
+    console.log('debug: page load - checking important elements');
+    const storesInput = document.getElementById('storesExcel');
+    console.log('debug: storesExcel element present:', !!storesInput);
+    if (storesInput) {
+      // Add a harmless debug listener to log file selection (does not replace existing handler)
+      storesInput.addEventListener('change', function debugStoresChange(e) {
+        const f = e.target.files && e.target.files[0];
+        console.log('debug: storesExcel change event - file selected:', f ? f.name : null);
+      }, { passive: true });
+    }
+
+    const genBtn = document.getElementById('generateStateTemplates');
+    console.log('debug: generateStateTemplates present:', !!genBtn);
+    if (genBtn) {
+      genBtn.addEventListener('click', function debugGenerateClick(ev) {
+        console.log('debug: generateStateTemplates clicked (debug listener) - state filter:', (document.getElementById('stateFilter')?.value || ''));
+      });
+    }
+  } catch (err) {
+    console.warn('debug: attach error', err);
+  }
 });
-
-
-
 
 
 
@@ -964,24 +1041,9 @@ let TEMPLATE_BG_SECONDARY_LANG = 'hi'; // default language for secondary templat
 function clearGeneratedTemplates() {
   const container = document.getElementById("templatesContainer");
   if (!container) return;
-  // ids we MUST preserve (adjust if your preview IDs differ)
-  const preserve = new Set([
-    'primaryTemplateBox',
-    'secondaryTemplateBox',
-    'templateClonePrimary',
-    'templateCloneSecondary'
-  ]);
-
-  // remove all children that are NOT in preserve set
-  Array.from(container.children).forEach(child => {
-    if (!child.id || !preserve.has(child.id)) {
-      // extra guard: do not remove the original editor templateBox if it's inside container
-      if (child.id === 'templateBox') return;
-      // also preserve any element explicitly flagged as preview
-      if (child.dataset && child.dataset.preview === "1") return;
-      child.remove();
-    }
-  });
+  // Clear all generated templates, radio buttons, and content
+  container.innerHTML = "";
+  console.log("✓ Generated templates container cleared");
 }
 
 /* Upload handlers (primary + secondary) */
@@ -1018,12 +1080,6 @@ function getGeneratedContainer() {
   return document.getElementById('generatedTemplates') || document.getElementById('templatesContainer');
 }
 
-
-
-
-
-
-
 document.getElementById('templateUploadPrimary')?.addEventListener('change', function(e){
   const file = e.target.files[0];
   if (!file) return;
@@ -1033,7 +1089,14 @@ document.getElementById('templateUploadPrimary')?.addEventListener('change', fun
     updateTemplatePreviews();
     // show on main editor as preview if desired (do not change store-address font/styles)
     const box = document.getElementById('templateBox');
-    if (box && !TEMPLATE_BG_DATA_URL) box.style.backgroundImage = `url(${TEMPLATE_BG_PRIMARY})`;
+    if (box && !TEMPLATE_BG_DATA_URL) {
+      box.style.backgroundImage = `url(${TEMPLATE_BG_PRIMARY})`;
+      // Check footer position setting and apply class if needed
+      const footerMode = document.querySelector('input[name="footer_position"]:checked')?.value;
+      if (footerMode === 'below_template') {
+        box.classList.add('has-template');
+      }
+    }
     console.log('Primary (EN) template uploaded');
     alert('Primary template uploaded.');
   };
@@ -1086,12 +1149,33 @@ function removeExactClone(id) {
 
 document.getElementById('templateUploadSecondary')?.addEventListener('change', function(e){
   const file = e.target.files && e.target.files[0];
-  if (!file) { removeExactClone('templateCloneSecondary'); return; }
+  if (!file) { 
+    // user cleared the input, remove any preview/clone and clear background
+    removeExactClone('templateCloneSecondary');
+    const box = document.getElementById('templateBox');
+    if (box && !TEMPLATE_BG_DATA_URL) {
+      box.style.backgroundImage = "";
+      box.classList.remove('has-template');
+    }
+    return; 
+  }
   const reader = new FileReader();
   reader.onload = ev => {
     TEMPLATE_BG_SECONDARY = ev.target.result;
     updateTemplatePreviews();
-    // create clone identical to #templateBox with secondary background (if needed elsewhere)
+
+    // also use secondary image as live background (same logic as primary)
+    const box = document.getElementById('templateBox');
+    if (box && !TEMPLATE_BG_DATA_URL) {
+      box.style.backgroundImage = `url(${TEMPLATE_BG_SECONDARY})`;
+      // Check footer position setting and apply class if needed
+      const footerMode = document.querySelector('input[name="footer_position"]:checked')?.value;
+      if (footerMode === 'below_template') {
+        box.classList.add('has-template');
+      }
+    }
+
+    // create a clone for output/preview if needed
     createExactClone('templateCloneSecondary', ev.target.result);
     console.log('Secondary template uploaded (local language)');
     alert('Secondary template uploaded.');
@@ -1111,6 +1195,11 @@ window.clearAllTemplates = function(...args){
   if (templateBox) {
     templateBox.style.backgroundImage = "";
     templateBox.style.backgroundColor = "transparent";
+    // Clear all address display elements
+    const addressElements = templateBox.querySelectorAll('[data-address-element]');
+    addressElements.forEach(el => el.remove());
+    // Remove the has-template class to restore footer position
+    templateBox.classList.remove('has-template');
   }
   const customUploadInput = document.getElementById('templateUpload');
   if (customUploadInput) {
@@ -1124,11 +1213,28 @@ window.clearAllTemplates = function(...args){
   if (secondaryUploadInput) {
     secondaryUploadInput.value = "";
   }
+  // Reset footer position radio button to default (Both)
+  const defaultFooterRadio = document.getElementById('footer_both');
+  if (defaultFooterRadio) {
+    defaultFooterRadio.checked = true;
+  }
+  // Update address preview and live template display
+  if (typeof updateAddressPreview === 'function') {
+    updateAddressPreview();
+  }
   if (typeof originalClearAll === 'function') return originalClearAll(...args);
 
 };
 
 
+// NOTE: the simple listener below was accidentally left in place after
+// the richer handler above. it overwrote the first handler and prevented the
+// live preview from updating when a secondary template was chosen. the
+// original (above) handler already covers all required behaviour, including
+// updating the preview, cloning the template box for generated output, and
+// setting the live-background when no custom template is active. remove the
+// redundant listener entirely to avoid conflicts.
+/*
 document.getElementById('templateUploadSecondary')?.addEventListener('change', function(e){
   const file = e.target.files[0];
   if (!file) return;
@@ -1140,6 +1246,7 @@ document.getElementById('templateUploadSecondary')?.addEventListener('change', f
   };
   reader.readAsDataURL(file);
 });
+*/
 
 
 
@@ -1229,6 +1336,9 @@ async function generateTemplatesFromSheet() {
   // Disable creation of separate local-language templates; only English templates should be generated
   langColumns.length = 0;
 
+  // Get the current address display setting from radio buttons
+  const addressDisplayMode = (document.querySelector('input[name="address_display"]:checked') || document.querySelector('input[name="footer_position"]:checked'))?.value || 'footer_only';
+
   // create templates
   rows.forEach((store, i) => {
     // English clone
@@ -1246,8 +1356,19 @@ async function generateTemplatesFromSheet() {
     const footerEn = cloneEn.querySelector("#storeFooterName");
     if (footerEn) {
       const engAddr = (addressKey && store[addressKey]) || "";
-      footerEn.innerHTML = `<span class="store-address">${escapeHtml(engAddr)}</span>` +
-        (mobileKey && store[mobileKey] ? `<span class="separator">|</span><span class="contact-icon"><img src="/static/images/contact-logo.svg" alt="phone"></span><span class="store-mobile">${escapeHtml(store[mobileKey]||"")}</span>` : "");
+      const mobileNum = mobileKey && store[mobileKey] ? escapeHtml(store[mobileKey]) : "";
+      
+      // Apply address display styling based on current selection
+      if (addressDisplayMode === 'both') {
+        // Show address only in footer
+        footerEn.innerHTML = `<span class="store-address">${escapeHtml(engAddr)}</span>` +
+          (mobileNum ? `<span class="separator">|</span><span class="contact-icon"><img src="/static/images/contact-logo.svg" alt="phone"></span><span class="store-mobile">${mobileNum}</span>` : "");
+      } else {
+        // Default: footer_only
+        footerEn.innerHTML = `<span class="store-address">${escapeHtml(engAddr)}</span>` +
+          (mobileNum ? `<span class="separator">|</span><span class="contact-icon"><img src="/static/images/contact-logo.svg" alt="phone"></span><span class="store-mobile">${mobileNum}</span>` : "");
+      }
+      
       Object.values(FONT_CLASS_MAP).forEach(cls => {
         footerEn.classList.remove(cls);
         cloneEn.classList.remove(cls);
@@ -1257,6 +1378,35 @@ async function generateTemplatesFromSheet() {
     }
     container.appendChild(cloneEn);
     syncFinalLayerFor(cloneEn);
+
+    // Ensure generated clone shows only the final footer (avoid duplicate inline footer)
+    try {
+      const srcFooter = cloneEn.querySelector('#storeFooterName');
+      if (srcFooter) srcFooter.style.display = 'none';
+      const footerFinal = cloneEn.querySelector('#storeFooterNameFinal');
+      if (footerFinal) {
+        if (addressDisplayMode === 'below_line') {
+          // Use class-based markup; CSS controls spacing and appearance
+          footerFinal.innerHTML = `
+            <div class="blue-line-wrap"><div class="blue-line"></div></div>
+            <div class="store-below-line">${escapeHtml((addressKey && store[addressKey]) || "")}${mobileNum ? `<span class="separator"> | </span><span class="store-mobile">📞 ${mobileNum}</span>` : ''}</div>
+          `;
+        } else if (addressDisplayMode === 'both') {
+          // add a simple header element for the 'both' mode
+          const existingHeader = cloneEn.querySelector('.generated-address-header');
+          if (!existingHeader) {
+            const headerEl = document.createElement('div');
+            headerEl.className = 'generated-address-header';
+            headerEl.style.cssText = 'border-bottom: 3px solid #0b4fa3; padding: 10px; margin-bottom: 12px; text-align: center; font-weight: 900; color: #1a1a1a; background: #f0f8ff; position: relative; z-index: 5;';
+            headerEl.innerHTML = `${escapeHtml((addressKey && store[addressKey]) || "")} ${mobileNum ? `<span class="separator"> | </span><span class="store-mobile">📞 ${mobileNum}</span>` : ''}`;
+            cloneEn.insertBefore(headerEl, cloneEn.firstChild);
+          }
+          footerFinal.innerHTML = `<div style="border-top: 3px solid #0b4fa3; padding: 12px; text-align: center; font-weight: 900; color: #1a1a1a; background: #f9f9f9;">${escapeHtml((addressKey && store[addressKey]) || "")} ${mobileNum ? `<span class="separator"> | </span><span class="store-mobile">📞 ${mobileNum}</span>` : ''}</div>`;
+        } else {
+          footerFinal.innerHTML = `<span class="store-address">${escapeHtml((addressKey && store[addressKey]) || "")}</span>` + (mobileNum ? `<span class="separator">|</span><span class="contact-icon"><img src="/static/images/contact-logo.svg" alt="phone"></span><span class="store-mobile">${mobileNum}</span>` : '');
+        }
+      }
+    } catch (e) { console.warn('final footer patch error', e); }
 
     // Local language clones (only when column exists and has content)
     langColumns.forEach((lc, langIdx) => {
@@ -1293,6 +1443,13 @@ async function generateTemplatesFromSheet() {
         cloneLang.appendChild(badge);
         container.appendChild(cloneLang);
         syncFinalLayerFor(cloneLang);
+        // Hide inline footer in lang clone and move content to final overlay
+        try {
+          const srcF = cloneLang.querySelector('#storeFooterName');
+          if (srcF) srcF.style.display = 'none';
+          const finalF = cloneLang.querySelector('#storeFooterNameFinal');
+          if (finalF) finalF.innerHTML = `<span class="store-address">${escapeHtml(text)}</span>` + (mobileKey && store[mobileKey] ? `<span class="separator">|</span><span class="contact-icon"><img src="/static/images/contact-logo.svg" alt="phone"></span><span class="store-mobile">${escapeHtml(store[mobileKey]||"")}</span>` : '');
+        } catch (e) { /* ignore */ }
       }
     });
   });
@@ -1312,6 +1469,9 @@ async function generateTemplatesFromSheet_twoTemplate() {
 
   // Preserve preview boxes, clear only generated templates
   clearGeneratedTemplates();
+
+  // current address display mode (footer_only | both | below_line)
+  const addressDisplayMode = (document.querySelector('input[name="address_display"]:checked') || document.querySelector('input[name="footer_position"]:checked'))?.value || 'footer_only';
 
   // pick sheet to use (same logic as generateTemplatesFromSheet)
   const chosenStateOrSheet = (document.getElementById("stateFilter")?.value || "").trim();
@@ -1415,8 +1575,25 @@ async function generateTemplatesFromSheet_twoTemplate() {
         primaryFooter.classList.remove(cls);
         clonePrimary.classList.remove(cls);
       });
-      const contactHtml = buildContactSegment(mobileKey ? (store[mobileKey] || "") : "");
-      primaryFooter.innerHTML = `<span class="store-address">${escapeHtml(engAddr || "")}</span>` + contactHtml;
+      
+      // Apply address display styling based on current selection
+      const mobileNum = mobileKey && store[mobileKey] ? escapeHtml(store[mobileKey]) : "";
+        if (addressDisplayMode === 'below_line') {
+        // Show address below a blue line (class-based markup)
+        primaryFooter.innerHTML = `
+          <div class="blue-line-wrap"><div class="blue-line"></div></div>
+          <div class="store-below-line">${escapeHtml(engAddr)}${mobileNum ? `<span class="separator"> | </span><span class="store-mobile">📞 ${mobileNum}</span>` : ''}</div>
+        `;
+      } else if (addressDisplayMode === 'both') {
+        // Show address only in footer
+        const contactHtml = buildContactSegment(mobileKey ? (store[mobileKey] || "") : "");
+        primaryFooter.innerHTML = `<span class="store-address">${escapeHtml(engAddr || "")}</span>` + contactHtml;
+      } else {
+        // Default: footer_only
+        const contactHtml = buildContactSegment(mobileKey ? (store[mobileKey] || "") : "");
+        primaryFooter.innerHTML = `<span class="store-address">${escapeHtml(engAddr || "")}</span>` + contactHtml;
+      }
+      
       // ensure class for english font
       primaryFooter.classList.add(FONT_CLASS_MAP.en || 'lang-en');
       clonePrimary.classList.add(FONT_CLASS_MAP.en || 'lang-en');
@@ -1425,6 +1602,34 @@ async function generateTemplatesFromSheet_twoTemplate() {
     // sync + append
     syncFinalLayerFor(clonePrimary);
     generatedContainer.appendChild(clonePrimary);
+
+    // Move footer to final overlay and hide inline footer to avoid duplication/overlap
+    try {
+      const src = clonePrimary.querySelector('#storeFooterName');
+      if (src) src.style.display = 'none';
+      const finalF = clonePrimary.querySelector('#storeFooterNameFinal');
+      const mobileNum = mobileKey && store[mobileKey] ? escapeHtml(store[mobileKey]) : '';
+      if (finalF) {
+        if (addressDisplayMode === 'below_line') {
+          finalF.innerHTML = `
+            <div class="blue-line-wrap"><div class="blue-line"></div></div>
+            <div class="store-below-line">${escapeHtml(engAddr || '')}${mobileNum ? `<span class="separator"> | </span><span class="store-mobile">📞 ${mobileNum}</span>` : ''}</div>
+          `;
+        } else if (addressDisplayMode === 'both') {
+          // add header element
+          if (!clonePrimary.querySelector('.generated-address-header')) {
+            const h = document.createElement('div');
+            h.className = 'generated-address-header';
+            h.style.cssText = 'border-bottom: 3px solid #0b4fa3; padding: 10px; margin-bottom: 12px; text-align: center; font-weight: 900; color: #1a1a1a; background: #f0f8ff; position: relative; z-index: 5;';
+            h.innerHTML = `${escapeHtml(engAddr || '')} ${mobileNum ? `<span class="separator"> | </span><span class="store-mobile">📞 ${mobileNum}</span>` : ''}`;
+            clonePrimary.insertBefore(h, clonePrimary.firstChild);
+          }
+          finalF.innerHTML = `<div style="border-top: 3px solid #0b4fa3; padding: 12px; margin-top: 18px; text-align: center; font-weight: 900; color: #1a1a1a; background: #f9f9f9;">${escapeHtml(engAddr || '')} ${mobileNum ? `<span class="separator"> | </span><span class="store-mobile">📞 ${mobileNum}</span>` : ''}</div>`;
+        } else {
+          finalF.innerHTML = `<span class="store-address">${escapeHtml(engAddr || '')}</span>` + (mobileNum ? `<span class="separator">|</span><span class="contact-icon"><img src="/static/images/contact-logo.svg" alt="phone"></span><span class="store-mobile">${mobileNum}</span>` : '');
+        }
+      }
+    } catch (e) { console.warn('primary final overlay error', e); }
 
     // --- SECONDARY (Local language) ---
     // strategy to pick local language text:
@@ -1508,8 +1713,24 @@ async function generateTemplatesFromSheet_twoTemplate() {
         secondaryFooter.classList.remove(cls);
         cloneSecondary.classList.remove(cls);
       });
-      const contactHtmlSec = buildContactSegment(mobileKey ? (store[mobileKey] || "") : "");
-      secondaryFooter.innerHTML = `<span class="store-address">${escapeHtml(secondaryAddr || "")}</span>` + contactHtmlSec;
+      
+      // Apply address display styling based on current selection
+      const mobileNum = mobileKey && store[mobileKey] ? escapeHtml(store[mobileKey]) : "";
+      if (addressDisplayMode === 'below_line') {
+        // Show address below a blue line (class-based)
+        secondaryFooter.innerHTML = `
+          <div class="blue-line-wrap"><div class="blue-line"></div></div>
+          <div class="store-below-line">${escapeHtml(secondaryAddr || "")}${mobileNum ? `<span class="separator"> | </span><span class="store-mobile">📞 ${mobileNum}</span>` : ''}</div>
+        `;
+      } else if (addressDisplayMode === 'both') {
+        // Show address only in footer
+        const contactHtmlSec = buildContactSegment(mobileKey ? (store[mobileKey] || "") : "");
+        secondaryFooter.innerHTML = `<span class="store-address">${escapeHtml(secondaryAddr || "")}</span>` + contactHtmlSec;
+      } else {
+        // Default: footer_only
+        const contactHtmlSec = buildContactSegment(mobileKey ? (store[mobileKey] || "") : "");
+        secondaryFooter.innerHTML = `<span class="store-address">${escapeHtml(secondaryAddr || "")}</span>` + contactHtmlSec;
+      }
 
       // add language class if we can detect (optional)
       const langClassKey = (secondaryLangCodeUsed || "en").toLowerCase();
@@ -1529,6 +1750,30 @@ async function generateTemplatesFromSheet_twoTemplate() {
 
     syncFinalLayerFor(cloneSecondary);
     generatedContainer.appendChild(cloneSecondary);
+
+    // Move footer to final overlay for secondary clone too
+    try {
+      const srcS = cloneSecondary.querySelector('#storeFooterName');
+      if (srcS) srcS.style.display = 'none';
+      const finalS = cloneSecondary.querySelector('#storeFooterNameFinal');
+      const mobileNumSec = mobileKey && store[mobileKey] ? escapeHtml(store[mobileKey]) : '';
+      if (finalS) {
+        if (addressDisplayMode === 'below_line') {
+          finalS.innerHTML = `\n            <div style="text-align: center; margin-top: 30px; padding: 15px 0;">\n              <div style="width: 60%; height: 3px; background: #0b4fa3; margin: 0 auto 12px; border-radius: 2px;"></div>\n              <div style="font-weight: 900; color: #1a1a1a; white-space: normal;">\n                ${escapeHtml(secondaryAddr || '')} ${mobileNumSec ? `<span class="separator"> | </span><span class="store-mobile">📞 ${mobileNumSec}</span>` : ''}\n              </div>\n            </div>\n          `;
+        } else if (addressDisplayMode === 'both') {
+          if (!cloneSecondary.querySelector('.generated-address-header')) {
+            const h2 = document.createElement('div');
+            h2.className = 'generated-address-header';
+            h2.style.cssText = 'border-bottom: 3px solid #0b4fa3; padding: 10px; margin-bottom: 12px; text-align: center; font-weight: 900; color: #1a1a1a; background: #f0f8ff; position: relative; z-index: 5;';
+            h2.innerHTML = `${escapeHtml(secondaryAddr || '')} ${mobileNumSec ? `<span class="separator"> | </span><span class="store-mobile">📞 ${mobileNumSec}</span>` : ''}`;
+            cloneSecondary.insertBefore(h2, cloneSecondary.firstChild);
+          }
+          finalS.innerHTML = `<div style="border-top: 3px solid #0b4fa3; padding: 12px; margin-top: 18px; text-align: center; font-weight: 900; color: #1a1a1a; background: #f9f9f9;">${escapeHtml(secondaryAddr || '')} ${mobileNumSec ? `<span class="separator"> | </span><span class="store-mobile">📞 ${mobileNumSec}</span>` : ''}</div>`;
+        } else {
+          finalS.innerHTML = `<span class="store-address">${escapeHtml(secondaryAddr || '')}</span>` + (mobileNumSec ? `<span class="separator">|</span><span class="contact-icon"><img src="/static/images/contact-logo.svg" alt="phone"></span><span class="store-mobile">${mobileNumSec}</span>` : '');
+        }
+      }
+    } catch (e) { console.warn('secondary final overlay error', e); }
 
     // run per-clone footer fixes so clones display correctly immediately
     try { runFooterFixes(clonePrimary); } catch (e) { console.warn(e); }
@@ -1564,6 +1809,9 @@ async function generateTemplatesFromUploadedTemplate({ selectedState = "" } = {}
   const container = document.getElementById("templatesContainer");
   // container.innerHTML = "";
   clearGeneratedTemplates();
+
+  // Get the current address display setting
+  const addressDisplayMode = (document.querySelector('input[name="address_display"]:checked') || document.querySelector('input[name="footer_position"]:checked'))?.value || 'footer_only';
 
   const originalKeys = Object.keys(excelData[0] || {});
   const keyMap = {};
@@ -1608,11 +1856,34 @@ async function generateTemplatesFromUploadedTemplate({ selectedState = "" } = {}
 
     const footerEl = clone.querySelector("#storeFooterName");
     if (!footerEl) continue;
-    footerEl.innerHTML =
-      `<span class="store-address">${escapeHtml(addressText)}</span>` +
-      (mobileText
-        ? `<span class="separator">|</span><span class="contact-icon"><img src="/static/images/contact-logo.svg" alt="phone"></span><span class="store-mobile">${escapeHtml(mobileText)}</span>`
-        : "");
+    
+    // Apply address display styling based on current selection
+    if (addressDisplayMode === 'below_line') {
+      // Show address below a blue line (class-based markup)
+      footerEl.innerHTML = `
+        <div class="blue-line-wrap"><div class="blue-line"></div></div>
+        <div class="store-below-line">${escapeHtml(addressText)}${mobileText ? `<span class="separator"> | </span><span class="store-mobile">📞 ${escapeHtml(mobileText)}</span>` : ''}</div>
+      `;
+    } else if (addressDisplayMode === 'both') {
+      // Show address at top and bottom
+      footerEl.innerHTML = `
+        <div style="border-bottom: 3px solid #0b4fa3; padding: 10px; margin-bottom: 15px; text-align: center; font-weight: 900; color: #1a1a1a; background: #f0f8ff;">
+          ${escapeHtml(addressText)}
+          ${mobileText ? `<span class="separator"> | </span><span class="store-mobile">📞 ${escapeHtml(mobileText)}</span>` : ''}
+        </div>
+        <div style="border-top: 3px solid #0b4fa3; padding: 12px; margin-top: 30px; text-align: center; font-weight: 900; color: #1a1a1a; background: #f9f9f9;">
+          ${escapeHtml(addressText)}
+          ${mobileText ? `<span class="separator"> | </span><span class="store-mobile">📞 ${escapeHtml(mobileText)}</span>` : ''}
+        </div>
+      `;
+    } else {
+      // Default: footer_only
+      footerEl.innerHTML =
+        `<span class="store-address">${escapeHtml(addressText)}</span>` +
+        (mobileText
+          ? `<span class="separator">|</span><span class="contact-icon"><img src="/static/images/contact-logo.svg" alt="phone"></span><span class="store-mobile">${escapeHtml(mobileText)}</span>`
+          : "");
+    }
 
     Object.values(FONT_CLASS_MAP).forEach(c => clone.classList.remove(c));
     const fontClass = FONT_CLASS_MAP[lang] || FONT_CLASS_MAP.en;
@@ -1626,6 +1897,25 @@ async function generateTemplatesFromUploadedTemplate({ selectedState = "" } = {}
 
     container.appendChild(clone);
     syncFinalLayerFor(clone);
+    // Move footer content into final overlay and hide source footer to avoid duplicates
+    try {
+      const srcF = clone.querySelector('#storeFooterName');
+      if (srcF) srcF.style.display = 'none';
+      const finalF = clone.querySelector('#storeFooterNameFinal');
+      if (finalF) {
+        if (addressDisplayMode === 'below_line') {
+          finalF.innerHTML = `
+            <div class="blue-line-wrap"><div class="blue-line"></div></div>
+            <div class="store-below-line">${escapeHtml(addressText)}${mobileText ? `<span class="separator"> | </span><span class="store-mobile">📞 ${escapeHtml(mobileText)}</span>` : ''}</div>
+          `;
+        } else {
+          // For both and default/footer_only modes, render address (and mobile if present)
+          finalF.innerHTML = `<span class="store-address">${escapeHtml(addressText)}</span>` + (mobileText ? `<span class="separator">|</span><span class="contact-icon"><img src="/static/images/contact-logo.svg" alt="phone"></span><span class="store-mobile">${escapeHtml(mobileText)}</span>` : '');
+        }
+      }
+    } catch (e) {
+      console.warn('uploaded-template final overlay error', e);
+    }
   }
 
   await inlineSvgAsDataUrl('.contact-icon img');
@@ -1794,17 +2084,70 @@ function clearAllTemplates() {
   if (container) {
     const confirmClear = confirm("Are you sure you want to clear all generated templates?");
     if (confirmClear) {
-      // container.innerHTML = "";
+      // Clear generated templates container
       clearGeneratedTemplates();
-      const footerEl = templateBox?.querySelector("#storeFooterName");
-      if (footerEl) {
-        footerEl.innerHTML = "Default Store Name";
+      
+      // Clear live template
+      if (templateBox) {
+        // Clear background image
+        templateBox.style.backgroundImage = "";
+        templateBox.style.backgroundColor = "transparent";
+        
+        // Reset footer name to default
+        const footerNameEl = templateBox.querySelector("#storeFooterName");
+        if (footerNameEl) {
+          footerNameEl.innerHTML = "Default Store Name";
+        }
+        
+        // Clear store footer content
+        const storeFooterEl = templateBox.querySelector("#storeFooter");
+        if (storeFooterEl) {
+          storeFooterEl.innerHTML = "";
+        }
+        
+        // Remove all draggable elements
+        const draggables = templateBox.querySelectorAll('.draggable');
+        if (draggables) {
+          draggables.forEach(el => el.remove());
+        }
+        
+        // Remove all address display elements
+        const addressElements = templateBox.querySelectorAll('[data-address-element]');
+        if (addressElements) {
+          addressElements.forEach(el => el.remove());
+        }
+        
+        // Remove has-template class
+        templateBox.classList.remove('has-template');
       }
-      const draggables = templateBox?.querySelectorAll('.draggable');
-      if (draggables) {
-        draggables.forEach(el => el.remove());
+      
+      // Reset footer customization inputs
+      const footerNameInput = document.getElementById('footerName');
+      if (footerNameInput) {
+        footerNameInput.value = "";
       }
-      console.log("✓ All templates and content cleared");
+      const footerWhatsAppInput = document.getElementById('footerWhatsApp');
+      if (footerWhatsAppInput) {
+        footerWhatsAppInput.value = "";
+      }
+      
+      // Reset footer position radio button to default (Footer Only)
+      const defaultFooterRadio = document.getElementById('footer_both');
+      if (defaultFooterRadio) {
+        defaultFooterRadio.checked = true;
+      }
+      
+      // Update preview to reflect default state
+      if (typeof updateAddressPreview === 'function') {
+        updateAddressPreview();
+      }
+      
+      // Update footer position display
+      if (typeof updateFooterPosition === 'function') {
+        updateFooterPosition();
+      }
+      
+      console.log("✓ All templates and live content cleared");
       alert("✅ All templates have been cleared!");
     }
   }

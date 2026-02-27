@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Show Primary and Secondary Template</title>
+    <link rel="stylesheet" href="/static/css/marketing-template.css">
     <style>
         .template-box {
             border: 2px solid #007bff;
@@ -15,13 +16,148 @@
             margin-bottom: 8px;
             color: #007bff;
         }
+        .store-header {
+            border-bottom: 2px solid #007bff;
+            padding: 12px;
+            margin-bottom: 8px;
+            background: #f0f8ff;
+            text-align: center;
+            font-size: 14px;
+            /* header no longer shifted upward */
+            /* transform: translateY(-6px); */
+            position: relative;
+            z-index: 1;
+        }
+        .store-header .store-name {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #007bff;
+        }
+        .store-header .store-info {
+            color: #333;
+            line-height: 1.6;
+        }
+        .store-footer {
+            border-top: 2px solid #007bff;
+            padding: 16px;
+            margin-top: 24px;
+            background: #f0f8ff;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        /* when the address appears immediately below a template
+           add extra space so it isn't too close; increased margin
+           to push the address further down by default */
+        #storeFooterNameUp,
+        #storeFooterNameUpFinal {
+            margin-top: 120px;
+            display: block;
+        }
+        .store-address-line {
+            margin-top: 8px;
+            text-align: center;
+            font-weight: 700;
+            white-space: nowrap;
+            display: block;
+        }
+        /* Blue line scenario: display address below a centered blue rule */
+        .blue-line-wrap {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin-top: 18px;
+            margin-bottom: 12px;
+        }
+        .blue-line {
+            width: 60%;
+            height: 3px;
+            background: #0b4fa3; /* blue line color */
+            border-radius: 2px;
+        }
+        .store-below-line {
+            text-align: center;
+            margin-top: 18px;
+            font-weight: 900;
+            color: #1a1a1a;
+            white-space: nowrap;
+        }
+        /* Stronger overrides to ensure the footer/address moves down
+           for the different display modes (use !important so inline
+           style takes precedence over other linked CSS). */
+        .store-footer.store-footer-default {
+            margin-top: 120px !important;
+        }
+        .store-footer.store-footer-default .blue-line-wrap {
+            margin-top: 90px !important;
+        }
+        .store-footer.store-footer-default .store-below-line {
+            margin-top: 60px !important;
+        }
+        .store-footer.store-footer-below {
+            margin-top: 140px !important;
+        }
+        .store-footer.store-footer-below .blue-line-wrap {
+            margin-top: 110px !important;
+        }
+        .store-footer.store-footer-below .store-below-line {
+            margin-top: 80px !important;
+        }
+        .store-footer .store-name {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #007bff;
+        }
+        .store-footer .store-info {
+            color: #333;
+            line-height: 1.6;
+        }
     </style>
 </head>
 <body>
+    {% set address_display = address_display if address_display is defined else session.get('address_display', 'footer_only') %}
+    <!-- Store Address Header Section - Only if display option is 'both' -->
+    {% if address_display == 'both' and store_addresses and store_addresses|length > 0 %}
+    <div class="store-header">
+        {% for addr in store_addresses %}
+            {% if addr.store_name or addr.get('Store_Name') or addr.get('storeName') %}
+                <div class="store-name">{{ addr.store_name or addr.get('Store_Name') or addr.get('storeName') }}</div>
+            {% endif %}
+            <div class="store-info">
+                {% if addr.address or addr.get('Address') %}
+                    <div>{{ addr.address or addr.get('Address') }}</div>
+                {% endif %}
+                {% if addr.mobile_number or addr.get('mobile') or addr.get('phone') %}
+                    <div>Mobile: {{ addr.mobile_number or addr.get('mobile') or addr.get('phone') }}</div>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
     <div class="template-box">
         <div class="template-label">Primary Template</div>
         {% if filenames and filenames|length > 0 %}
             {% include filenames[0] %}
+            {% if address_display == 'both' and store_addresses and store_addresses|length > 0 %}
+            <div id="storeFooterNameUp">
+                {% for addr in store_addresses %}
+                <div class="store-address-line">
+                    {% if addr.store_name or addr.get('Store_Name') or addr.get('storeName') %}
+                        <span class="store-address">{{ addr.store_name or addr.get('Store_Name') or addr.get('storeName') }}</span>
+                    {% endif %}
+                    {% if addr.address or addr.get('Address') %}
+                        <span class="separator"> | </span>
+                        <span class="store-address">{{ addr.address or addr.get('Address') }}</span>
+                    {% endif %}
+                    {% if addr.mobile_number or addr.get('mobile') or addr.get('phone') %}
+                        <span class="separator"> | </span>
+                        <span class="store-mobile">{{ addr.mobile_number or addr.get('mobile') or addr.get('phone') }}</span>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
         {% else %}
             <div>No primary template uploaded.</div>
         {% endif %}
@@ -30,9 +166,65 @@
         <div class="template-label">Secondary Template</div>
         {% if filenames and filenames|length > 1 %}
             {% include filenames[1] %}
+            {% if address_display == 'both' and store_addresses and store_addresses|length > 0 %}
+            <div id="storeFooterNameUpFinal">
+                {% for addr in store_addresses %}
+                <div class="store-address-line">
+                    {% if addr.store_name or addr.get('Store_Name') or addr.get('storeName') %}
+                        <span class="store-address">{{ addr.store_name or addr.get('Store_Name') or addr.get('storeName') }}</span>
+                    {% endif %}
+                    {% if addr.address or addr.get('Address') %}
+                        <span class="separator"> | </span>
+                        <span class="store-address">{{ addr.address or addr.get('Address') }}</span>
+                    {% endif %}
+                    {% if addr.mobile_number or addr.get('mobile') or addr.get('phone') %}
+                        <span class="separator"> | </span>
+                        <span class="store-mobile">{{ addr.mobile_number or addr.get('mobile') or addr.get('phone') }}</span>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
         {% else %}
             <div>No secondary template uploaded.</div>
         {% endif %}
     </div>
+
+    <!-- Store Address Footer Section -->
+    {% if store_addresses and store_addresses|length > 0 %}
+    <div class="store-footer {% if address_display == 'footer_only' %}store-footer-default{% elif address_display == 'below_line' %}store-footer-below{% endif %}">
+        {% set addr = store_addresses[0] %}
+        {% if address_display == 'below_line' %}
+            <div class="blue-line-wrap"><div class="blue-line"></div></div>
+            {% for addr in store_addresses %}
+            <div class="store-below-line">
+                {% if addr.store_name or addr.get('Store_Name') or addr.get('storeName') %}
+                    <span class="store-address">{{ addr.store_name or addr.get('Store_Name') or addr.get('storeName') }}</span>
+                {% endif %}
+                {% if addr.address or addr.get('Address') %}
+                    <span class="separator"> | </span>
+                    <span class="store-address">{{ addr.address or addr.get('Address') }}</span>
+                {% endif %}
+                {% if addr.mobile_number or addr.get('mobile') or addr.get('phone') %}
+                    <span class="separator"> | </span>
+                    <span class="store-mobile">{{ addr.mobile_number or addr.get('mobile') or addr.get('phone') }}</span>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+            {% if addr.store_name or addr.get('Store_Name') or addr.get('storeName') %}
+                <div class="store-name">{{ addr.store_name or addr.get('Store_Name') or addr.get('storeName') }}</div>
+            {% endif %}
+            <div class="store-info">
+                {% if addr.address or addr.get('Address') %}
+                    <div>{{ addr.address or addr.get('Address') }}</div>
+                {% endif %}
+                {% if addr.mobile_number or addr.get('mobile') or addr.get('phone') %}
+                    <div>Mobile: {{ addr.mobile_number or addr.get('mobile') or addr.get('phone') }}</div>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+    {% endif %}
 </body>
 </html>

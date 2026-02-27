@@ -11,7 +11,16 @@
         <input type="file" name="primary_template" id="primary_template" required><br><br>
         <label for="secondary_template">Secondary Template (Local Language):</label>
         <input type="file" name="secondary_template" id="secondary_template" required><br><br>
-        <button type="submit">Upload Templates</button>
+        <label for="store_address_excel">Store Address Excel File:</label>
+        <input type="file" name="store_address_excel" id="store_address_excel" accept=".xlsx,.xls" required><br><br>
+        <label>Store Address Display Option:</label><br>
+        <input type="radio" name="address_display" id="both" value="both">
+        <label for="both">Display in Both Header and Footer (header slightly upward)</label><br>
+        <input type="radio" name="address_display" id="footer_only" value="footer_only" checked>
+        <label for="footer_only">Display Only in Footer (default)</label><br>
+        <input type="radio" name="address_display" id="below_line" value="below_line">
+        <label for="below_line">Display Below Blue Line in Footer</label><br><br>
+        <button type="submit">Upload Templates and Store Address</button>
     </form>
 </body>
 </html>

@@ -140,6 +140,14 @@
           <div class="footer-action-right">
           </div>
         </div>
+
+        <div style="margin-top: 15px; padding: 12px; background: #f5f5f5; border-radius: 4px;">
+          <label style="font-weight:700; display: block; margin-bottom: 10px;">Template Footer Position:</label>
+          <input type="radio" name="footer_position" id="footer_both" value="both" checked onchange="updateFooterPosition();">
+          <label for="footer_both">Footer Only</label><br>
+          <input type="radio" name="footer_position" id="footer_below" value="below_template" onchange="updateFooterPosition();">
+          <label for="footer_below">Below Template</label>
+        </div>
       </section>
 
       <div class="template-upload-grid">
@@ -159,8 +167,11 @@
         <label for="footerTextColor">Footer Text Color:</label>
         <input type="color" id="footerTextColor" value="#9A6C0C" aria-label="Footer Text & Logo Color">
       </div>
+      
+      <!-- address preview container removed per request -->
+      
       <div id="templateBox" class="template-box lang-en">
-        <div id="storeFooterName">Default Store Name</div>
+        <div id="storeFooterName" style="left: 50%; transform: translateX(-50%); text-align: center; max-width: 95%; bottom: 120px; display: inline-flex;" class="lang-en">Default Store Name</div>
         <div id="storeFooter"></div>
       </div>
     </section>
@@ -183,5 +194,159 @@
   </main>
 
   <script src="/static/js/marketing-template.js"></script>
+  <script>
+    // Live preview of address display options
+    function updateAddressPreview() {
+      const sel = document.querySelector('input[name="address_display"]:checked') || document.querySelector('input[name="footer_position"]:checked');
+      const selected = sel ? sel.value : 'footer_only';
+      document.getElementById('addressPreviewBoth').style.display = selected === 'both' ? 'block' : 'none';
+      
+      // Also update live template in real-time as user clicks radio buttons
+      updateLiveTemplateDisplay(selected);
+    }
+    
+    // Auto-save when radio button changes (for immediate visual feedback)
+    function saveAddressDisplayAuto() {
+      const sel = document.querySelector('input[name="address_display"]:checked') || document.querySelector('input[name="footer_position"]:checked');
+      const selected = sel ? sel.value : 'footer_only';
+      console.log('Auto-save triggered, selected mode:', selected);
+      const formData = new FormData();
+      formData.append('address_display', selected);
+      
+      fetch('/set_address_display', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => {
+        console.log('Auto-save response status:', response.ok);
+        if (response.ok) {
+          console.log('Live template auto-updated for mode:', selected);
+          // Show subtle visual feedback (optional - just logs to console)
+          console.log('✅ Address display saved: ' + selected);
+        }
+      })
+      .catch(err => console.error('Error in auto-save:', err));
+    }
+    
+    // Update Live Template with address display based on selected option
+    function updateLiveTemplateDisplay(mode) {
+      console.log('updateLiveTemplateDisplay called with mode:', mode);
+      const templateBox = document.getElementById('templateBox');
+      if (!templateBox) {
+        console.error('templateBox not found!');
+        return;
+      }
+      
+      // Clean up: Remove only address elements, don't clear the entire box
+      const existingAddressElements = templateBox.querySelectorAll('[data-address-element]');
+      existingAddressElements.forEach(el => el.remove());
+      console.log('Removed existing address elements');
+      
+      const storeData = ''; // no sample address by default
+      
+      if (mode === 'footer_only') {
+        // Show address only in footer (use larger margin so it sits lower)
+        const footerElement = document.createElement('div');
+        footerElement.setAttribute('data-address-element', 'true');
+        footerElement.style.cssText = 'border-top: 3px solid #0b4fa3; padding: 12px; margin-top: 120px !important; text-align: center; font-weight: 900; color: #1a1a1a; background: #f9f9f9;';
+        footerElement.textContent = storeData;
+        templateBox.appendChild(footerElement);
+        console.log('✅ Added footer_only display (moved down)');
+        
+      } else if (mode === 'both') {
+        // Show address only in footer
+        const footerElement = document.createElement('div');
+        footerElement.setAttribute('data-address-element', 'true');
+        footerElement.style.cssText = 'border-top: 3px solid #0b4fa3; padding: 12px; margin-top: 520px; text-align: center; font-weight: 900; color: #1a1a1a; background: #f9f9f9;';
+        footerElement.textContent = storeData;
+        templateBox.appendChild(footerElement);
+        console.log('✅ Footer mode: Footer Only');
+      } else if (mode === 'below_line') {
+        // Show centered blue rule and address below it (shifted down)
+        const blueWrap = document.createElement('div');
+        blueWrap.setAttribute('data-address-element', 'true');
+        blueWrap.style.cssText = 'width:100%; display:flex; justify-content:center; margin-top:160px;';
+        const blueRule = document.createElement('div');
+        blueRule.style.cssText = 'width:60%; height:4px; background:#0b4fa3; border-radius:2px;';
+        blueWrap.appendChild(blueRule);
+        templateBox.appendChild(blueWrap);
+
+        const below = document.createElement('div');
+        below.setAttribute('data-address-element', 'true');
+        below.style.cssText = 'text-align:center; margin-top:28px; font-weight:900; color:#1a1a1a; white-space:nowrap;';
+        below.textContent = storeData;
+        templateBox.appendChild(below);
+        console.log('✅ Footer mode: Below blue line (Shifted Down)');
+      }
+    }
+    
+    // Update footer position based on radio button selection
+    function updateFooterPosition() {
+      const templateBox = document.getElementById('templateBox');
+      const selectedMode = document.querySelector('input[name="footer_position"]:checked')?.value;
+      
+      if (!templateBox) return;
+      
+      if (selectedMode === 'below_template') {
+        // Add class to shift footer down
+        templateBox.classList.add('has-template');
+        // Also apply to primary/secondary preview boxes if present
+        const primary = document.getElementById('primaryTemplateBox');
+        const secondary = document.getElementById('secondaryTemplateBox');
+        if (primary) primary.classList.add('has-template');
+        if (secondary) secondary.classList.add('has-template');
+        // Directly nudge footer elements inside previews to ensure immediate effect
+        // rely on the 'has-template' class and stylesheet overrides
+        // (remove inline bottom so CSS !important rules take precedence)
+        const selectors = ['#templateBox #storeFooterName', '#primaryTemplateBox #storeFooterName', '#secondaryTemplateBox #storeFooterName'];
+        selectors.forEach(sel => {
+          const el = document.querySelector(sel);
+          if (el) el.style.removeProperty('bottom');
+        });
+        // Apply inline style to store-address elements so long addresses wrap and get background
+        applyStoreAddressInlineStyle(true);
+        console.log('✅ Footer mode: Below Template (Shifted Down)');
+      } else if (selectedMode === 'both') {
+        // Remove class to keep footer at normal position
+        templateBox.classList.remove('has-template');
+        const primary = document.getElementById('primaryTemplateBox');
+        const secondary = document.getElementById('secondaryTemplateBox');
+        if (primary) primary.classList.remove('has-template');
+        if (secondary) secondary.classList.remove('has-template');
+        // remove any inline bottom so stylesheet controls the footer position
+        const selectors = ['#templateBox #storeFooterName', '#primaryTemplateBox #storeFooterName', '#secondaryTemplateBox #storeFooterName'];
+        selectors.forEach(sel => {
+          const el = document.querySelector(sel);
+          if (el) el.style.removeProperty('bottom');
+        });
+        applyStoreAddressInlineStyle(false);
+        console.log('✅ Footer mode: Footer Only (Normal Position)');
+      }
+    }
+    
+    // Apply or remove inline styles on `.store-address` elements inside editor previews.
+    function applyStoreAddressInlineStyle(enable) {
+      const nodes = document.querySelectorAll('#templateBox .store-address, #primaryTemplateBox .store-address, #secondaryTemplateBox .store-address');
+      const styleValue = "white-space: normal; display: inline-block; font-size: 13px !important; text-overflow: clip !important; overflow: visible; background: rgb(255, 255, 255); z-index: 60;";
+      nodes.forEach(n => {
+        if (enable) {
+          n.style.cssText = styleValue;
+        } else {
+          n.style.removeProperty('white-space');
+          n.style.removeProperty('display');
+          n.style.removeProperty('font-size');
+          n.style.removeProperty('text-overflow');
+          n.style.removeProperty('overflow');
+          n.style.removeProperty('background');
+          n.style.removeProperty('z-index');
+        }
+      });
+    }
+    
+    // Initialize preview on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      updateAddressPreview();
+    });
+  </script>
 </body>
 </html>

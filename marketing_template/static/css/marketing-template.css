@@ -6,10 +6,10 @@
 @font-face { font-family: "NotoSansKannada"; src: url("fonts/NotoSansKannada-Regular.ttf") format("truetype"); }
 @font-face { font-family: "NotoSansTelugu"; src: url("fonts/NotoSansTelugu-Regular.ttf") format("truetype"); }
 
-.lang-en { font-family: "NotoSans", Arial, sans-serif; }
-.lang-hi { font-family: "NotoSansDeva", "NotoSans", sans-serif; }
-.lang-mr { font-family: "NotoSansDeva", "NotoSans", sans-serif; }
-.lang-gu { font-family: "NotoSansGuj", "NotoSans", sans-serif; }
+.lang-en { font-family: "NotoSans", Arial, sans-serif;}
+.lang-hi { font-family: "NotoSansDeva", "NotoSans", sans-serif;}
+.lang-mr { font-family: "NotoSansDeva", "NotoSans", sans-serif;}
+.lang-gu { font-family: "NotoSansGuj", "NotoSans", sans-serif;}
 .lang-ta { font-family: "NotoSansTamil", "NotoSans", sans-serif; }
 .lang-bn { font-family: "NotoSansBeng", "NotoSans", sans-serif; }
 .lang-kn { font-family: "NotoSansKannada", "NotoSans", sans-serif; }
@@ -593,23 +593,27 @@ h1 {
   vertical-align: baseline !important;
 }
 
-.contact-icon { 
+.contact-icon {
   display: inline-flex !important;
-  width: 1.9em;
-  height: 1.9em;
+  width: 34px !important;
+  height: 34px !important;
   vertical-align: middle !important;
   line-height: 1 !important;
   margin: 0 9px 0 6px !important;
-  align-items: center;
-  justify-content: center;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 50% !important;
+  background: #000000 !important;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12) !important;
+  color: #fff !important;
 }
 
-.contact-icon img { 
-  width: 100%;
-  height: 100%;
-  display: block;
-  object-fit: contain;
-  filter: brightness(0) saturate(100%);
+.contact-icon img {
+  width: 60% !important;
+  height: 60% !important;
+  display: block !important;
+  object-fit: contain !important;
+  filter: none !important;
 }
 
 .store-mobile {
@@ -629,7 +633,7 @@ h1 {
 #storeFooterName,
 #storeFooterNameFinal {
   position: absolute;
-  bottom: 48px !important;
+ bottom:48px !important;
   left: 50%;
   transform: translateX(-52%);
   text-align: center;
@@ -647,7 +651,22 @@ h1 {
   max-width: 92%;
   pointer-events: none;
   line-height: 1 !important;
+  transition: bottom 0.3s ease;
 }
+
+/* When template is uploaded, shift footer down */
+.template-box.has-template #storeFooterName,
+.template-box.has-template #storeFooterNameFinal {
+  bottom: 80px !important;
+}
+
+/* /* Editor-specific: when the live editor's template box (id=templateBox)
+   has the 'has-template' class (Below Template selected), nudge
+   the footer addresses slightly further down for better spacing. */
+/* #templateBox.has-template #storeFooterName,
+#templateBox.has-template #storeFooterNameFinal {
+  bottom: 520px !important;
+} */ */
 
 /* store-address override in footer (kept same as your code) */
 .store-address {
@@ -668,26 +687,7 @@ h1 {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* force all footers a bit more left — quick override */
-/* #storeFooterName,
-#storeFooterNameFinal {
-  position: absolute;
-  bottom: 25px !important;
-  left: 50% !important;
-  transform: translateX(-24%) !important; /* shift even more to the right */
-  /* display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  text-align: center !important;
-  white-space: nowrap !important;
-  width: max-content;
-  max-width: 92%;
-  gap: 4px !important;
-  letter-spacing: 0px !important;
-  font-size: 18px !important;
-  color: #000 !important;
-  font-weight: 900 !important;
-} */ */
+
 
 
 #storeFooterName,
@@ -709,10 +709,49 @@ h1 {
   font-weight: 900 !important;
 }
 
+/* Strong override: ensure editor preview footer moves down when below-template is selected.
+   Added at file end so it takes precedence over earlier rules. */
+/* #templateBox.has-template #storeFooterName,
+#templateBox.has-template #storeFooterNameFinal,
+#templateBox.has-template #storeFooterNameUp,
+#templateBox.has-template #storeFooterNameUpFinal {
+  bottom: 520px !important;
+} */
 
+/* Upward footer inside uploaded template when 'both' option is chosen */
+#storeFooterNameUp,
+#storeFooterNameUpFinal {
+  position: absolute;
+  /* place a bit upward from the normal footer inside the template box */
+   bottom: 80px !important; 
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+  width: max-content;
+  max-width: 92%;
+  gap: 4px !important;
+  font-size: 18px !important;
+  color: #000 !important;
+  font-weight: 900 !important;
+  pointer-events: none;
+  z-index: 5;
+}
 
-
-
+/* Keep upward footer address styling consistent with footer */
+#storeFooterNameUp .store-address,
+#storeFooterNameUpFinal .store-address {
+  margin-right: 0 !important;
+  display: inline !important;
+  white-space: nowrap !important;
+  text-overflow: clip !important;
+  overflow: visible !important;
+  line-height: 1 !important;
+  text-align: center !important;
+}
 
 /* Address styling */
 #storeFooterName .store-address,
@@ -752,24 +791,33 @@ h1 {
 /* Contact icon — keep small and inline, never wrap (footer) */
 .contact-icon {
   display: inline-flex !important;
-  width: 20px !important;
-  height: 20px !important;
-  margin: 0 3px 0 4px !important;
+  width: 34px !important;
+  height: 34px !important;
+  margin: 0 6px !important;
   vertical-align: middle !important;
   line-height: 1 !important;
   opacity: 1 !important;
   visibility: visible !important;
   align-items: center !important;
   justify-content: center !important;
+  border-radius: 50% !important;
+  background: #000000 !important;
+  color: #fff !important;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12) !important;
 }
 
+/* Editor preview: shift default store address down by ~40px for better spacing */
+/* #templateBox #storeFooterName,
+#templateBox #storeFooterNameFinal {
+  /* bottom: 90px !important; further increased to push address down more */
+/* } */ */
+
 .contact-icon img {
+  width: 60% !important;
+  height: 60% !important;
   display: block !important;
-  width: 20px !important;
-  height: 20px !important;
   opacity: 1 !important;
   visibility: visible !important;
-  filter: brightness(0) saturate(100%) !important;
   object-fit: contain !important;
   filter: none !important;
 }
@@ -832,3 +880,138 @@ h1 {
 }
 
 /* Perfect centered footer – same as reference image */
+
+/* Extra downward shift only for the default footer-only store address */
+.store-footer.store-footer-default {
+  margin-top: 380px; /* increased space above the footer when default */
+  padding-top: 6px;
+}
+
+/* Additional spacing for the "below line" footer variant when
+   this is the default footer-only display — moves the blue rule
+   and the address further down so it sits lower on the page. */
+.store-footer.store-footer-default .blue-line-wrap {
+  margin-top: 320px; /* push the blue rule down further */
+}
+.store-footer.store-footer-default .store-below-line {
+  margin-top: 220px; /* move the below-line address further down */
+  font-weight: 1000;
+}
+
+/* When user chooses the "below blue line" option, push the blue rule
+   and the below-line address even further down (only for this mode). */
+.store-footer.store-footer-below {
+  margin-top: 400px; /* extra space above the footer for below_line mode */
+  padding-top: 6px;
+}
+.store-footer.store-footer-below .blue-line-wrap {
+  margin-top: 340px; /* push the blue rule down more */
+}
+.store-footer.store-footer-below .store-below-line {
+  margin-top: 280px; /* move the below-line address further below the rule */
+  font-weight: 1000;
+}
+
+/* Blue line and below-line address used by generated overlays and clones */
+.blue-line-wrap {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 12px;
+  margin-bottom: 6px;
+}
+.blue-line {
+  width: 60%;
+  height: 3px;
+  background: #0b4fa3;
+  border-radius: 2px;
+}
+.store-below-line {
+  text-align: center;
+  margin-top: 12px;
+  font-weight: 900;
+  color: #1a1a1a;
+  white-space: nowrap;
+}
+
+/* FINAL HIGH-SPECIFICITY OVERRIDE: force the "Default Store Name" footer
+   (and final overlay) much lower in template previews and generated output.
+   This targets the live editor `#templateBox` and preview clones. */
+#templateBox #storeFooterName,
+#templateBox #storeFooterNameFinal,
+.template-box #storeFooterName,
+.template-box #storeFooterNameFinal,
+#primaryTemplateBox #storeFooterName,
+#primaryTemplateBox #storeFooterNameFinal,
+#secondaryTemplateBox #storeFooterName,
+#secondaryTemplateBox #storeFooterNameFinal {
+  /* bottom: 90px !important; */
+  margin-top: 0 !important;
+  transform: translateX(-50%) !important;
+}
+
+
+/* Force preview/editor footers lower — very specific so it overrides any inline/earlier rules. */
+/* #templateBox #storeFooterName,
+#templateBox #storeFooterNameFinal,
+#primaryTemplateBox #storeFooterName,
+#primaryTemplateBox #storeFooterNameFinal,
+#secondaryTemplateBox #storeFooterName,
+#secondaryTemplateBox #storeFooterNameFinal,
+.template-box #storeFooterName,
+.template-box #storeFooterNameFinal {
+  bottom: 220px !important;
+  transform: translateX(-50%) !important;
+} */
+
+/* If editor toggles has-template, push even further down
+#templateBox.has-template #storeFooterName,
+#templateBox.has-template #storeFooterNameFinal,
+.template-box.has-template #storeFooterName,
+.template-box.has-template #storeFooterNameFinal {
+  bottom: 520px !important;
+} */
+
+
+/* =========================
+   FINAL PERFECT FOOTER
+   ========================= */
+
+#storeFooterName,
+#storeFooterNameFinal {
+  position: absolute;
+  /* bottom: 95px;               Adjust until it matches PDF exactly */
+  left: 50%;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap;
+  font-size: 18px;
+  font-weight: 900;
+  color: #000;
+  pointer-events: none;
+  max-width: 92%;
+}
+
+/* When template image is uploaded */
+.template-box.has-template #storeFooterName,
+.template-box.has-template #storeFooterNameFinal,
+#templateBox.has-template #storeFooterName,
+#templateBox.has-template #storeFooterNameFinal,
+.template-box #storeFooterName,
+.template-box #storeFooterNameFinal {
+  bottom: 48px !important; /* moved lower to sit above the blue rule */
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  font-size: 20px !important;
+  pointer-events: none !important;
+  z-index: 20 !important;
+}
+
+/* Remove the centered blue rule used in previews/templates */
+.blue-line,
+.blue-line-wrap {
+  display: none !important;
+}
