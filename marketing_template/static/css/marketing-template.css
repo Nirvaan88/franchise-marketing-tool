@@ -593,23 +593,26 @@ h1 {
   vertical-align: baseline !important;
 }
 
-.contact-icon { 
+.contact-icon {
   display: inline-flex !important;
-  width: 1.9em;
-  height: 1.9em;
+  width: 28px !important;
+  height: 28px !important;
   vertical-align: middle !important;
   line-height: 1 !important;
-  margin: 0 9px 0 6px !important;
-  align-items: center;
-  justify-content: center;
+  margin: 0 10px 0 6px !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
-.contact-icon img { 
-  width: 100%;
-  height: 100%;
-  display: block;
-  object-fit: contain;
-  filter: brightness(0) saturate(100%);
+.contact-icon img {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 28px !important;
+  max-height: 28px !important;
+  display: block !important;
+  object-fit: contain !important;
+  filter: none !important;
+  background: transparent !important;
 }
 
 .store-mobile {
@@ -647,6 +650,16 @@ h1 {
   max-width: 92%;
   pointer-events: none;
   line-height: 1 !important;
+}
+
+/* When the editor is set to 'More Down', force the footer further down
+   (use a higher-specificity selector with !important so it overrides
+   the default placement applied elsewhere). */
+#templateBox.more-down #storeFooterName,
+#templateBox.more-down #storeFooterNameFinal,
+.template-box.more-down #storeFooterName,
+.template-box.more-down #storeFooterNameFinal {
+  bottom: 12px !important;
 }
 
 /* store-address override in footer (kept same as your code) */
@@ -752,26 +765,32 @@ h1 {
 /* Contact icon — keep small and inline, never wrap (footer) */
 .contact-icon {
   display: inline-flex !important;
-  width: 20px !important;
-  height: 20px !important;
-  margin: 0 3px 0 4px !important;
+  width: 28px !important;
+  height: 28px !important;
+  margin: 0 6px 0 6px !important;
   vertical-align: middle !important;
   line-height: 1 !important;
   opacity: 1 !important;
   visibility: visible !important;
   align-items: center !important;
   justify-content: center !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 .contact-icon img {
   display: block !important;
-  width: 20px !important;
-  height: 20px !important;
+  width: 28px !important;
+  height: 28px !important;
   opacity: 1 !important;
   visibility: visible !important;
-  filter: brightness(0) saturate(100%) !important;
-  object-fit: contain !important;
   filter: none !important;
+  object-fit: contain !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
 }
 
 /* Mobile number */
@@ -805,6 +824,8 @@ h1 {
 }
 
 /* stacked template previews */
+
+
 .templates-stack {
   display: block;
   width: 100%;
@@ -832,3 +853,23 @@ h1 {
 }
 
 /* Perfect centered footer – same as reference image */
+/* Footer Bar Styling */
+.footer-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 18px;
+  font-weight: 600;
+  padding: 10px 0;
+}
+
+.footer-bar .divider {
+  opacity: 0.6;
+}
+
+.footer-bar .phone-box {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}

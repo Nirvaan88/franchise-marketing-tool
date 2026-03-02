@@ -166,6 +166,126 @@ async function loadCustomTemplate(file) {
   reader.readAsDataURL(file);
 }
 
+/**
+ * Create an A4-sized canvas with the live rendering of `box` placed over
+ * the chosen background (if provided). Returns an HTMLCanvasElement sized
+ * to A4 (2480x3508 px).
+ */
+async function createA4CanvasFromBox(box, bgImage /* optional Image */) {
+  const A4_W = 2480, A4_H = 3508;
+  // Capture the live DOM of the box at a reasonable scale
+  let snapCanvas;
+  try {
+    snapCanvas = await html2canvas(box, { backgroundColor: null, scale: Math.min(6, Math.max(1, Math.floor(A4_W / (box.getBoundingClientRect().width || 1)))) });
+  } catch (err) {
+    console.warn('createA4CanvasFromBox: html2canvas failed, falling back to simple capture', err);
+    snapCanvas = await html2canvas(box, { backgroundColor: null, scale: 2 });
+  }
+
+  const snapImg = new Image();
+  snapImg.crossOrigin = 'anonymous';
+  snapImg.src = snapCanvas.toDataURL('image/png');
+  await new Promise(r => { snapImg.onload = r; snapImg.onerror = r; });
+
+  const canvas = document.createElement('canvas');
+  canvas.width = A4_W; canvas.height = A4_H;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,A4_W,A4_H);
+
+  // draw background if provided
+  if (bgImage && bgImage.width) {
+    const ratio = Math.min(A4_W / bgImage.width, A4_H / bgImage.height);
+    const drawW = Math.round(bgImage.width * ratio);
+    const drawH = Math.round(bgImage.height * ratio);
+    const dx = Math.round((A4_W - drawW) / 2);
+    const dy = Math.round((A4_H - drawH) / 2);
+    ctx.drawImage(bgImage, dx, dy, drawW, drawH);
+  }
+
+  // place snapshot centered, scaled to fit A4
+  const snapRatio = Math.min(A4_W / snapImg.width, A4_H / snapImg.height);
+  const snapW = Math.round(snapImg.width * snapRatio);
+  const snapH = Math.round(snapImg.height * snapRatio);
+  const snapX = Math.round((A4_W - snapW) / 2);
+  const snapY = Math.round((A4_H - snapH) / 2);
+
+  try { ctx.drawImage(snapImg, snapX, snapY, snapW, snapH); } catch(e) { console.warn('Failed draw snapshot', e); }
+
+  // If the live DOM contains a contact-icon element, draw a guaranteed
+  // badge on top of the snapshot so the contact logo appears even when
+  // html2canvas misses/blank-images it. Map the contact icon bounding box
+  // from the box DOM to the A4 canvas coordinates.
+  try {
+    const iconEl = box.querySelector('.contact-icon img');
+    if (iconEl) {
+      const boxRect = box.getBoundingClientRect();
+      const iconRect = iconEl.getBoundingClientRect();
+      console.debug('createA4CanvasFromBox: contact icon bounds', { boxRect, iconRect, snapImg: { width: snapImg.width, height: snapImg.height }, snapRatio });
+      const scaleFromBoxToSnap = (snapImg.width / (boxRect.width || 1));
+      const iconX_onSnap = (iconRect.left - boxRect.left) * scaleFromBoxToSnap;
+      const iconY_onSnap = (iconRect.top - boxRect.top) * scaleFromBoxToSnap;
+      const iconW_onSnap = iconRect.width * scaleFromBoxToSnap;
+      const iconH_onSnap = iconRect.height * scaleFromBoxToSnap;
+
+      // After snap is drawn onto A4 with snapRatio, map to A4 coords
+      const iconX_onA4 = Math.round(snapX + iconX_onSnap * snapRatio);
+      const iconY_onA4 = Math.round(snapY + iconY_onSnap * snapRatio);
+      const iconW_onA4 = Math.round(iconW_onSnap * snapRatio);
+      const iconH_onA4 = Math.round(iconH_onSnap * snapRatio);
+
+      // Draw circular badge
+      ctx.save();
+      const cx = iconX_onA4 + Math.round(iconW_onA4 / 2);
+      const cy = iconY_onA4 + Math.round(iconH_onA4 / 2);
+      const r = Math.round(Math.max(iconW_onA4, iconH_onA4) / 2);
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.fillStyle = '#000000';
+      ctx.fill();
+      ctx.restore();
+
+      // Draw simple handset stroke in white (fallback)
+      ctx.save();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = Math.max(2, Math.round(r * 0.26));
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.arc(cx, cy, Math.round(r * 0.56), Math.PI * 0.75, Math.PI * 1.25, false);
+      ctx.stroke();
+      ctx.restore();
+
+      // Try to draw the actual contact image from the DOM over the badge
+      try {
+        const iconSrc = iconEl.getAttribute('src') || iconEl.src;
+        if (iconSrc) {
+          const iconImg = new Image();
+          try { iconImg.crossOrigin = 'anonymous'; } catch(e){}
+          await new Promise((res) => {
+            iconImg.onload = () => res(true);
+            iconImg.onerror = () => res(false);
+            // If the src is a data URL this will succeed immediately
+            iconImg.src = iconSrc;
+          }).then((ok) => {
+            try {
+              if (iconImg && iconImg.width) {
+                ctx.drawImage(iconImg, iconX_onA4, iconY_onA4, iconW_onA4, iconH_onA4);
+              }
+            } catch (drawErr) {
+              console.warn('createA4CanvasFromBox: drawing icon image failed', drawErr);
+            }
+          });
+        }
+      } catch (e) {
+        console.warn('createA4CanvasFromBox: could not overlay icon image', e);
+      }
+    }
+  } catch (e) {
+    console.warn('createA4CanvasFromBox: overlay contact badge failed', e);
+  }
+
+  return canvas;
+}
+
 function normalizeLangCode(code) {
   if (code == null) return "";
   const raw = String(code).trim().toLowerCase();
@@ -246,11 +366,19 @@ function makeDraggable(el) {
 
 /* ---------- Contact SVG inlining helper ---------- */
 
-// Embedded base64 SVG for contact icon
-const CONTACT_ICON_BASE64 = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB2ZXJzaW9uPSIxLjEiIGlkPSJMYXllcl8xIiB4PSIwcHgiIHk9IjBweCIgd2lkdGg9IjEwMCUiIHZpZXdCb3g9IjAgMCA4MjAgODYxIiBlbmFibGUtYmFja2dyb3VuZD0ibmV3IDAgMCA4MjAgODYxIiB4bWw6c3BhY2U9InByZXNlcnZlIj4NCjxwYXRoIGZpbGw9IiNmZmZmZmYiIG9wYWNpdHk9IjEuMDAwMDAwIiBzdHJva2U9Im5vbmUiIGQ9IiBNNDI1LjAwMDAwMCw4NjIuMDAwMDAwICAgQzI4My4zMzMzNzQsODYyLjAwMDAwMCAxNDIuMTY2NzQ4LDg2Mi4wMDAwMDAgMS4wMDAwOTUsODYyLjAwMDAwMCAgIEMxLjAwMDA2Myw1NzUuMDAwMTIyIDEuMDAwMDYzLDI4OC4wMDAyNDQgMS4wMDAwMzIsMS4wMDAyODcgICBDMjc0LjMzMzEzMCwxLjAwMDE5MSA1NDcuNjY2MjYwLDEuMDAwMTkxIDgyMC45OTk1MTIsMS4wMDAwOTYgICBDODIwLjk5OTY5NSwyODcuOTk5NzI1IDgyMC45OTk2OTUsNTc0Ljk5OTQ1MSA4MjAuOTk5ODc4LDg2MS45OTk1NzMgICBDNjg5LjE2NjY4Nyw4NjIuMDAwMDAwIDU1Ny4zMzMzMTMsODYyLjAwMDAwMCA0MjUuMDAwMDAwLDg2Mi4wMDAwMDAgIE00NTQuMDI5MDUzLDgzOS42NDE0NzkgICBDNDczLjAwMTAzOCw4MzYuMTIzNjU3IDQ5Mi4yMjc2NjEsODMzLjYxOTY5MCA1MTAuOTA0OTM4LDgyOC45Mjg0NjcgICBDNjY3LjgwMDUzNyw3ODkuNTIxMDU3IDc4Ni43OTUyMjcsNjU2LjA4NTI2NiA4MDcuODU2Njg5LDQ5NS4yNzAyNjQgICBDODE2LjUxOTcxNCw0MjkuMTIzMTk5IDgwOS40MTA5NTAsMzY0LjQxOTQ5NSA3ODYuMDI2MzY3LDMwMS41NzYyNjMgICBDNzIxLjA3NDI4MCwxMjcuMDI1MzA3IDU0Mi40NjA4NzYsMTguOTI0MTkyIDM1NC4xOTg0ODYsNDYuMDAyNTIyICAgQzI3My4wMzAwMjksNTcuNjc3MjEyIDIwMS4wMDI4MjMsOTAuMjE4NzE5IDE0MS4yNzQzMjMsMTQ2LjczNzI0NCAgIEMzMS4wMTg1NjIsMjUxLjA2NzU4MSAtOS44NzA2MjksMzc5LjA5NzcxNyAyMC4zNTAxODUsNTI3LjM4MjY5MCAgIEM1My44NjkyOTcsNjkxLjg1MTQ0MCAxOTIuODY3MTU3LDgxNy41MTQzNDMgMzU5Ljc3MTk0Miw4MzguODYzMjIwICAgQzM5MC44MDM4MDIsODQyLjgzMjUyMCA0MjEuOTczOTk5LDg0MS41NTc5MjIgNDU0LjAyOTA1Myw4MzkuNjQxNDc5ICB6Ii8+DQo8cGF0aCBmaWxsPSIjMDAwMDAwIiBvcGFjaXR5PSIxLjAwMDAwMCIgc3Ryb2tlPSJub25lIiBkPSIgTTQ1My41NjczNTIsODM5LjY3NzEyNCAgIEM0MjEuOTczOTk5LDg0MS41NTc5MjIgMzkwLjgwMzgwMiw4NDIuODMyNTIwIDM1OS43NzE5NDIsODM4Ljg2MzIyMCAgIEMxOTIuODY3MTU3LDgxNy41MTQzNDMgNTMuODY5Mjk3LDY5MS44NTE0NDAgMjAuMzUwMTg1LDUyNy4zODI2OTAgICBDLTkuODcwNjI5LDM3OS4wOTc3MTcgMzEuMDE4NTYyLDI1MS4wNjc1ODEgMTQxLjI3NDMyMywxNDYuNzM3MjQ0ICAgQzIwMS4wMDI4MjMsOTAuMjE4NzE5IDI3My4wMzAwMjksNTcuNjc3MjEyIDM1NC4xOTg0ODYsNDYuMDAyNTIyICAgQzU0Mi40NjA4NzYsMTguOTI0MTkyIDcyMS4wNzQyODAsMTI3LjAyNTMwNyA3ODYuMDI2MzY3LDMwMS41NzYyNjMgICBDODA5LjQxMDk1MCwzNjQuNDE5NDk1IDgxNi41MTk3MTQsNDI5LjEyMzE5OSA4MDcuODU2Njg5LDQ5NS4yNzAyNjQgICBDNzg2Ljc5NTIyNyw2NTYuMDg1MjY2IDY2Ny44MDA1MzcsNzg5LjUyMTA1NyA1MTAuOTA0OTM4LDgyOC45Mjg0NjcgICBDNDQ1LjI1MjA3NSw2NzMuNjU2MTI4IDQ3Mi41Njk2MTEsNjg2LjI1MDczMiA1MDMuNzU0MDU5LDY4OC41MjY3MzMgICBDNTM4LjAyNjYxMSw2OTEuMDI4MDc2IDU2Ni45MTgyNzQsNjc5LjI3NTQ1MiA1OTEuMTY3NjAzLDY1NS43MTY3OTcgICBDNjA0Ljg2OTYyOSw2NDIuNDA1MDkwIDYwNi41MzUyNzgsNjI4LjkwOTYwNyA1OTYuNzg5Nzk1LDYxMy4zNjE1NzIgICBDNTg1LjIxNDQ3OCw1OTQuODk0MDQzIDU3MS4wMDU2MTUsNTc4LjU4NjMwNCA1NTMuNzYzMzY3LDU2NS4xMDYyNjIgICBDNTMzLjgxMjI1Niw1NDkuNTA4MzYyIDUxMi41NTM0MDYsNTQ3LjcyOTE4NyA0OTEuMTAzMDg4LDU2MS4xNjQzMDcgICBDNDc5LjE2NzYwMyw1NjguNjM5OTU0IDQ2OC4zMjUyNTYsNTc3Ljg4MDI0OSA0NTcuMTEzMzEyLDU4Ni40ODU1OTYgICBDNDQ3LjQwMjAzOSw1OTMuOTM5MjA9IDQ0Ni45MTAxODcsNTk0LjY5OTg5MCA0MzcuNTczMjQyLDU4Ni42NjQ0OTAgICBDNDIyLjA3MDg2Miw1NzMuMzIzMTIwIDQwNy4zODE1MzEsNTU5LjAzNjk4NyAzOTEuODYyMDkxLDU0NC42MzQ1MjEgIHoiLz4NCjxwYXRoIGZpbGw9IiNmZmZmZmYiIG9wYWNpdHk9IjEuMDAwMDAwIiBzdHJva2U9Im5vbmUiIGQ9IiBNMzkyLjEwNTg5Niw1NDQuODkxNjYzICAgQzQwNy4zODE1MzEsNTU5LjAzNjk4NyA0MjIuMDcwODYyLDU3My4zMjMxMjAgNDM3LjU3MzI0Miw1ODYuNjY0NDkwICAgQzQ0Ni45MTAxODcsNTk0LjY5OTg5MCA0NDcuNDAyMDM5LDU5My45Mzk2MjA5IDQ1Ny4xMTMzMTIsNTg2LjQ4NTU5NiAgIEM0NjguMzI1MjU2LDU3Ny44ODAyNDkgNDc5LjE2NzYwMyw1NjguNjM5OTU0IDQ5MS4xMDMwODgsNTYxLjE2NDMwNyAgIEM1MTIuNTUzNDA2LDU0Ny43MjkxODcgNTMzLjgxMjI1Niw1NDkuNTA4MzYyIDU1My43NjMzNjcsNTY1LjEwNjI2MiAgIEM1NzEuMDA1NjE1LDU3OC41ODYzMDQgNTg1LjIxNDQ3OCw1OTQuODk0MDQzIDU5Ni43ODk3OTUsNjEzLjM2MTU3MiAgIEM2MDYuNTM1Mjc4LDYyOC45MDk2MDcgNjA0Ljg2OTYyOSw2NDIuNDA1MDkwIDU5MS4xNjc2MDMsNjU1LjcxNjc5NyAgIEM1NjYuOTE4Mjc0LDY3OS4yNzU0NTIgNTM4LjAyNjYxMSw2OTEuMDI4MDc2IDUwMy43NTQwNTksNjg4LjUyNjczMyAgIEM0NzIuNTY5NjExLDY4Ni4yNTA3MzIgNDQ1LjI1MjA3NSw2NzMuNjU2MTI4IDQxOS4zMjIxNDQsNjU3LjQ0NTE5MCAgIEMzNzQuNDQyNTk2LDYyOS4zODcyMDcgMzM4LjIyMjQ3Myw1OTIuMTY1NDY2IDMwNy4zNDkxODIsNTQ5LjU5MTMwOSAgIEMyNzMuMjU2NjIyLDUwMi41Nzc4NTAgMjQ2Ljg3NDg5Myw0NTEuNjEzODYxIDIzMC45MDY5ODIsMzk1LjU3NzU3NiAgIEMyMjEuNzkzOTE1LDM2My41OTY5ODUgMjE4LjIyNTA1MiwzMzAuOTQ1MDY4IDIxOS45NzIyMjksMjk3LjcwOTU2NCAgIEMyMjEuMjk2OTUxLDI3Mi41MTAyNTQgMjMxLjk5ODg3MSwyNTEuMTAwNzU0IDI0Ny4zNTM2MjIsMjMxLjkyOTkzMiAgIEMyNTUuMjE4MTU1LDIyMi4xMTA4MjUgMjYzLjk4OTY4NSwyMTIuNzYwODY0IDI3My41Njc4NzEsMjA0LjYzMjQ2MiAgIEMyODcuNjM5MjIxLDE5Mi42OTEwNDAgMzA0LjU2NDIwOSwxOTEuMTU5ODk3IDMxOC41MjY1ODEsMjAwLjI3NTQ5NyAgIEMzMjQuODkxMDgzLDIwNC40MzA3MjUgMzMwLjY5MDc2NSwyMTAuMzU2OTE4IDMzNC45MzQ2MDEsMjE2LjY5MzQyMCAgIEMzNTAuOTY5ODE4LDI0MC42MzU3MTIgMzYwLjI5MDI4MywyNjcuMDE3OTE0IDM2Mi4zMjg3OTYsMjk2LjAxMjc4NyAgIEMzNjIuODI3NjA2LDMwMy4xMDc1NDQgMzYwLjk2NDIwMywzMDcuNDg2NTQyIDM1NS45MjAxMDUsMzEyLjI2ODA2NiAgIEMzNDUuMTExMjAzLDMyMi41MTM1ODAgMzMyLjU2MDgyMiwzMjkuODQwMTQ5IDMxOS42NDI2MDksMzM2LjgyODc5NiAgIEMzMTMuODAyMTU1LDMzOS45ODg0NjQgMzA4LjEwMzE0OSwzNDMuNDg1MDE2IDMwMi42NjQwMDEsMzQ3LjI5MTcxOCAgIEMyOTYuMDUxNTQ0LDM1MS45MTk1ODYgMjkzLjIxNTI0MCwzNTguNTk3MjYwIDI5My4zMDk5MDYsMzY2LjY5NTg2MiAgIEMyOTMuNDc3OTY2LDM4MS4wNjY4OTUgMjk4LjUwMzYzMiwzOTQuMTcyOTQzIDMwNC4yNjU1NjQsNDA2Ljg5NTQ0NyAgIEMzMjYuOTI4MTkyLDQ1Ni45MzUzNjQgMzU1LjI2ODI4MCw1MDMuNDI1MTEwIDM5Mi4xMDU4OTYsNTQ0Ljg5MTY2MyAgeiIvPg0KPC9zdmc+DQ==';
+// Embedded base64 SVG fallback: if the app static path is unreachable
+// (404 during export) this in-memory data URL will ensure the icon
+// is always available for canvas/pdf generation without network fetches.
+// We default to the same gold badge used in the static SVG.
+const CONTACT_ICON_BASE64 = createColoredContactSvg('#d8a23f');
 
 function getContactIconHtml() {
-  return `<span class="contact-icon"><img src="${CONTACT_ICON_BASE64}" alt="phone"></span>`;
+  // Build the static contact SVG path from the current origin so
+  // the script works whether the app is served as http://127.0.0.1:8000
+  // or another host/port.
+  const origin = (typeof window !== 'undefined' && window.location && window.location.origin) ? window.location.origin : '';
+  const src = origin + '/static/images/contact-logo.svg';
+  return `<span class="contact-icon"><img src="${src}" alt="phone" aria-hidden="true"></span>`;
 }
 
 function buildContactSegment(phoneText) {
@@ -260,17 +388,9 @@ function buildContactSegment(phoneText) {
 
 // Global helper: create colored contact SVG with colored ring + white phone
 function createColoredContactSvg(bgColor = "#000000") {
-  const svgContent = `<?xml version="1.0" encoding="utf-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 861">
-  <!-- background / ring (colored) -->
-  <path fill="${bgColor}" d="M453.567,839.677C421.974,841.558 390.804,842.833 359.772,838.863C192.867,817.514 53.869,691.851 20.35,527.383C-9.871,379.098 31.019,251.068 141.274,146.737C201.003,90.219 273.03,57.677 354.198,46.003C542.461,18.924 721.074,127.025 786.026,301.576C809.411,364.419 816.52,429.123 807.857,495.27C786.795,656.085 667.801,789.521 510.905,828.928C492.228,833.62 473.001,836.124 453.567,839.677Z"/>
-  <!-- outer white mask to shape the ring (keeps edges crisp) -->
-  <path fill="#ffffff" d="M425,862C283.333,862 142.167,862 1,862C1,575 1,288 1,1C274.333,1 547.666,1 821,1C821,288 821,575 821,862C689.167,862 557.333,862 425,862Z"/>
-  <!-- phone silhouette (always white) -->
-  <g fill="#ffffff">
-    <path d="M391.862,544.635C355.268,503.425 326.928,456.935 304.266,406.895C298.504,394.173 293.478,381.067 293.31,366.696C293.215,358.597 296.052,351.92 302.664,347.292C308.103,343.485 313.802,339.988 319.643,336.829C332.561,329.84 345.112,322.514 355.92,312.268C360.964,307.487 362.828,303.108 362.329,296.013C360.29,267.018 350.97,240.636 334.935,216.693C330.691,210.357 324.891,204.431 318.527,200.275C304.564,191.16 287.639,192.691 273.568,204.632C263.99,212.761 255.218,222.111 247.354,231.93C231.999,251.101 221.297,272.51 219.972,297.71C221.297,272.51 231.999,251.101 247.354,231.93C255.218,222.111 263.99,212.761 273.568,204.632C287.639,192.691 304.564,191.16 318.527,200.275C324.891,204.431 330.691,210.357 334.935,216.693C350.97,240.636 360.29,267.018 362.329,296.013C362.828,303.108 360.964,307.487 355.92,312.268C345.112,322.514 332.561,329.84 319.643,336.829C313.802,339.988 308.103,343.485 302.664,347.292C296.052,351.92 293.215,358.597 293.31,366.696C293.478,381.067 298.504,394.173 304.266,406.895C326.928,456.935 355.268,503.425 392.106,544.892Z"/>
-  </g>
-</svg>`;
+  // Return a compact 24x24 SVG: colored circular badge with a white handset
+  const safeColor = String(bgColor || '#000000').replace(/"/g, '');
+  const svgContent = `<?xml version="1.0" encoding="utf-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">\n  <circle cx="12" cy="12" r="10" fill="${safeColor}" stroke="#6b4b0a" stroke-width="1.2"/>\n  <path fill="#111111" stroke="#ffffff" stroke-width="0.4" d="M6.62 10.79a15.466 15.466 0 006.59 6.59l2.2-2.2a1 1 0 011.11-.24c.96.39 2.06.76 3.06.76a1 1 0 011 1V20a1 1 0 01-1 1A17 17 0 013 4a1 1 0 011-1h2.5a1 1 0 011 1c.01.24.09.47.22.68.18.3.47.56.85.78.47.27 1.08.56 1.86.66.5.07.88.38 1.02.86.12.41.04.84-.25 1.18l-2.2 2.2z"/>\n</svg>`;
 
   const base64 = btoa(unescape(encodeURIComponent(svgContent)));
   return 'data:image/svg+xml;base64,' + base64;
@@ -323,16 +443,25 @@ async function inlineSvgAsDataUrl(imgSelector, options = {}) {
   // If a forced color is provided, prefer createColoredContactSvg to recolor ring
   const coloredDataUrl = forcedColor ? createColoredContactSvg(forcedColor) : null;
 
-  // Resolve final src once
+  // Resolve final src once. Prefer forced color, then embedded base64/data-url
   let finalSrc = null;
 
-  // If preferDataUrl specified, try data url first
   if (preferDataUrl) {
     if (CONTACT_ICON_BASE64) finalSrc = CONTACT_ICON_BASE64;
     else if (coloredDataUrl) finalSrc = coloredDataUrl;
   }
 
-  // If no finalSrc yet, test the appSvgPath
+  // If forced color requested, use colored data URL immediately
+  if (!finalSrc && forcedColor) {
+    finalSrc = createColoredContactSvg(forcedColor);
+  }
+
+  // If we already have an embedded base64, use it to avoid network fetches (prevents 404 noise)
+  if (!finalSrc && CONTACT_ICON_BASE64) {
+    finalSrc = CONTACT_ICON_BASE64;
+  }
+
+  // If still no finalSrc, test the app static path (last resort)
   if (!finalSrc) {
     try {
       const ok = await testLoad(appSvgPath);
@@ -340,9 +469,8 @@ async function inlineSvgAsDataUrl(imgSelector, options = {}) {
     } catch(e) { /* ignore */ }
   }
 
-  // Fall back to coloredDataUrl or embedded base64
+  // Fall back to coloredDataUrl as a last option
   if (!finalSrc && coloredDataUrl) finalSrc = coloredDataUrl;
-  if (!finalSrc && CONTACT_ICON_BASE64) finalSrc = CONTACT_ICON_BASE64;
 
   // As last fall back, create a very small inline SVG white phone (guaranteed to render)
   if (!finalSrc) {
@@ -410,6 +538,69 @@ async function convertSvgImagesToPng(imgSelector, size = 24) {
       loader.src = src;
     } catch (error) {
       console.warn('convertSvgImagesToPng error', error);
+      resolve();
+    }
+  })));
+}
+
+// Convert matched <img> elements that reference SVGs (data URLs or remote
+// SVG files) into PNG data URLs for reliable canvas rendering. This will
+// attempt to fetch remote SVGs as needed and always replace the `src`
+// with a PNG data URL when possible.
+async function convertAnySvgImagesToPng(imgSelector, size = 24) {
+  const imgs = Array.from(document.querySelectorAll(imgSelector));
+  if (!imgs.length) return;
+
+  await Promise.all(imgs.map(img => new Promise(async (resolve) => {
+    try {
+      const src = img.getAttribute('src') || img.src || '';
+      if (!src) return resolve();
+
+      // If it's already a PNG, skip
+      if (/^data:image\/png/.test(src) || /\.png($|\?)/i.test(src)) return resolve();
+
+      let svgDataUrl = null;
+
+      if (/^data:image\/svg\+xml/.test(src)) {
+        svgDataUrl = src;
+      } else if (/\.svg($|\?)/i.test(src) || src.trim().endsWith('.svg')) {
+        // fetch remote svg text and convert to data URL
+        try {
+          const res = await fetch(src, { cache: 'no-store' });
+          if (res && res.ok) {
+            const text = await res.text();
+            svgDataUrl = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(text)));
+          }
+        } catch (e) {
+          // ignore fetch errors
+          console.warn('convertAnySvgImagesToPng: failed to fetch remote svg', src, e);
+        }
+      }
+
+      if (!svgDataUrl) return resolve();
+
+      const loader = new Image();
+      loader.crossOrigin = 'anonymous';
+      loader.onload = function () {
+        try {
+          const dim = Math.max(size, parseInt(window.getComputedStyle(img).width, 10) || size);
+          const canvas = document.createElement('canvas');
+          canvas.width = dim;
+          canvas.height = dim;
+          const ctx = canvas.getContext('2d');
+          ctx.clearRect(0, 0, dim, dim);
+          ctx.drawImage(loader, 0, 0, dim, dim);
+          const pngData = canvas.toDataURL('image/png');
+          if (pngData) img.setAttribute('src', pngData);
+        } catch (err) {
+          console.warn('convertAnySvgImagesToPng draw error', err);
+        }
+        resolve();
+      };
+      loader.onerror = function () { resolve(); };
+      loader.src = svgDataUrl;
+    } catch (error) {
+      console.warn('convertAnySvgImagesToPng error', error);
       resolve();
     }
   })));
@@ -553,18 +744,38 @@ function setStoreFooterFontSize() {
 /* ---------- Footer position ---------- */
 function adjustFooterPosition(){
   const footers = document.querySelectorAll("#storeFooterName, #storeFooterNameFinal");
+  // read selected footer position radio (default to footer_only)
+  const pos = (document.querySelector('input[name="footer_position"]:checked')||{value:'footer_only'}).value;
   footers.forEach(footer => {
     const textLength = footer.textContent.trim().length;
-    
-    if (textLength < 80) footer.style.bottom = "38px";
-    else if (textLength < 128) footer.style.bottom = "29px";
-    else footer.style.bottom = "28px";
-    
+    let baseBottom;
+
+    if (textLength < 80) baseBottom = 38;
+    else if (textLength < 128) baseBottom = 29;
+    else baseBottom = 28;
+
+    // If user selected the new 'more_down' option, move the address further down
+    if (pos === 'more_down') {
+      // Smaller bottom value moves the element closer to the bottom edge
+      if (baseBottom === 38) baseBottom = 12;
+      else if (baseBottom === 29) baseBottom = 9;
+      else baseBottom = 6;
+    }
+
+    footer.style.bottom = baseBottom + "px";
     footer.style.left = '50%';
     footer.style.transform = 'translateX(-56%)';
     footer.style.textAlign = 'center';
     footer.style.maxWidth = '95%';
   });
+  // toggle a class on the main template box so CSS can apply !important overrides
+  try {
+    const templateBox = document.getElementById('templateBox') || document.querySelector('.template-box');
+    if (templateBox) {
+      if (pos === 'more_down') templateBox.classList.add('more-down');
+      else templateBox.classList.remove('more-down');
+    }
+  } catch(e){ /* ignore */ }
 }
 
 /* ---------- Font wait helper for html2canvas / canvas correctness ---------- */
@@ -645,6 +856,8 @@ function syncFinalLayerFor(box){
   }
 
   ensureContactIconAfterSeparator(box);
+  // ensure footer positions are recalculated to respect the editor radio setting
+  try { adjustFooterPosition(); } catch(e){ /* ignore */ }
 }
 
 function cloneExactFooter(sourceBox, targetBox) {
@@ -1247,7 +1460,7 @@ async function generateTemplatesFromSheet() {
     if (footerEn) {
       const engAddr = (addressKey && store[addressKey]) || "";
       footerEn.innerHTML = `<span class="store-address">${escapeHtml(engAddr)}</span>` +
-        (mobileKey && store[mobileKey] ? `<span class="separator">|</span><span class="contact-icon"><img src="/static/images/contact-logo.svg" alt="phone"></span><span class="store-mobile">${escapeHtml(store[mobileKey]||"")}</span>` : "");
+        (mobileKey && store[mobileKey] ? `<span class="separator">|</span>${getContactIconHtml()}<span class="store-mobile">${escapeHtml(store[mobileKey]||"")}</span>` : "");
       Object.values(FONT_CLASS_MAP).forEach(cls => {
         footerEn.classList.remove(cls);
         cloneEn.classList.remove(cls);
@@ -1276,7 +1489,7 @@ async function generateTemplatesFromSheet() {
         const footerLang = cloneLang.querySelector("#storeFooterName");
         if (footerLang) {
           footerLang.innerHTML = `<span class="store-address">${escapeHtml(text)}</span>` +
-            (mobileKey && store[mobileKey] ? `<span class="separator">|</span><span class="contact-icon"><img src="/static/images/contact-logo.svg" alt="phone"></span><span class="store-mobile">${escapeHtml(store[mobileKey]||"")}</span>` : "");
+            (mobileKey && store[mobileKey] ? `<span class="separator">|</span>${getContactIconHtml()}<span class="store-mobile">${escapeHtml(store[mobileKey]||"")}</span>` : "");
           Object.values(FONT_CLASS_MAP).forEach(cls => {
             footerLang.classList.remove(cls);
             cloneLang.classList.remove(cls);
@@ -1579,6 +1792,7 @@ async function generateTemplatesFromUploadedTemplate({ selectedState = "" } = {}
   }
 
   for (let i = 0; i < rows.length; i++){
+
     const store = rows[i];
     const clone = templateBox.cloneNode(true);
     clone.id = `template_clone_${i}_${lang}`;
@@ -1611,7 +1825,7 @@ async function generateTemplatesFromUploadedTemplate({ selectedState = "" } = {}
     footerEl.innerHTML =
       `<span class="store-address">${escapeHtml(addressText)}</span>` +
       (mobileText
-        ? `<span class="separator">|</span><span class="contact-icon"><img src="/static/images/contact-logo.svg" alt="phone"></span><span class="store-mobile">${escapeHtml(mobileText)}</span>`
+        ? `<span class="separator">|</span>${getContactIconHtml()}<span class="store-mobile">${escapeHtml(mobileText)}</span>`
         : "");
 
     Object.values(FONT_CLASS_MAP).forEach(c => clone.classList.remove(c));
@@ -1683,7 +1897,7 @@ document.getElementById("generateStateTemplates").addEventListener("click", asyn
         }
         const addrEn = pickAddressForLanguage(store, 'en', [addressKey]);
         const footerEn = cloneEn.querySelector('#storeFooterName');
-        if (footerEn) footerEn.innerHTML = `<span class="store-address">${escapeHtml(addrEn||"")}</span>` + (store[phoneKey] ? `<span class="separator">|</span><span class="contact-icon"><img src="/static/images/contact-logo.svg" alt="phone"></span><span class="store-mobile">${escapeHtml(store[phoneKey]||"")}</span>` : "");
+        if (footerEn) footerEn.innerHTML = `<span class="store-address">${escapeHtml(addrEn||"")}</span>` + (store[phoneKey] ? `<span class="separator">|</span>${getContactIconHtml()}<span class="store-mobile">${escapeHtml(store[phoneKey]||"")}</span>` : "");
         container.appendChild(cloneEn);
         syncFinalLayerFor(cloneEn);
 
@@ -1704,7 +1918,7 @@ document.getElementById("generateStateTemplates").addEventListener("click", asyn
             cloneSec.style.backgroundImage = `url(${TEMPLATE_BG_PRIMARY})`;
           }
           const footerSec = cloneSec.querySelector('#storeFooterName');
-          if (footerSec) footerSec.innerHTML = `<span class="store-address">${escapeHtml(addrSec || addrEn || "")}</span>` + (store[phoneKey] ? `<span class="separator">|</span><span class="contact-icon"><img src="/static/images/contact-logo.svg" alt="phone"></span><span class="store-mobile">${escapeHtml(store[phoneKey]||"")}</span>` : "");
+          if (footerSec) footerSec.innerHTML = `<span class="store-address">${escapeHtml(addrSec || addrEn || "")}</span>` + (store[phoneKey] ? `<span class="separator">|</span>${getContactIconHtml()}<span class="store-mobile">${escapeHtml(store[phoneKey]||"")}</span>` : "");
           container.appendChild(cloneSec);
           syncFinalLayerFor(cloneSec);
         }
@@ -1879,13 +2093,10 @@ async function downloadTemplateWithLang(which) {
   });
   try {
     // render the visible box (with background + footer + icon)
-    const canvas = await html2canvas(box, {
-      scale: 4,
-      useCORS: true,
-      backgroundColor: "#ffffff"
-    });
-
-    const imgData = canvas.toDataURL("image/jpeg", 0.95);
+    // Use A4 helper so output matches Perfect A4 rendering
+    const bgCandidate = (typeof TEMPLATE_BG_DATA_URL !== 'undefined' && TEMPLATE_BG_DATA_URL) ? await (async () => { const i=new Image(); i.src=TEMPLATE_BG_DATA_URL; await new Promise(r=>i.onload=r); return i; })() : null;
+    const a4Canvas = await createA4CanvasFromBox(box, bgCandidate);
+    const imgData = a4Canvas.toDataURL("image/jpeg", 0.95);
 
     // create A4 PDF
     if (!window.jspdf || !window.jspdf.jsPDF) {
@@ -1896,7 +2107,7 @@ async function downloadTemplateWithLang(which) {
     const pdf = new jsPDF("p", "mm", "a4");
 
     const pdfWidth = 210;
-    const pdfHeight = (canvas.height / canvas.width) * pdfWidth;
+    const pdfHeight = (a4Canvas.height / a4Canvas.width) * pdfWidth;
     pdf.addImage(imgData, "JPEG", 0, 0, pdfWidth, pdfHeight);
 
     // build filename from address
@@ -2318,6 +2529,94 @@ async function downloadAllPerfectA4() {
           continue;
         }
 
+        // Try to capture a live A4 snapshot of the current "box" (generated
+        // template or editor preview). If html2canvas + our helper exists
+        // and succeeds, use that snapshot directly as the A4 page so the
+        // exported PDF matches the live/generated template exactly.
+        try {
+          // if (window.html2canvas && typeof createA4CanvasFromBox === 'function') {
+            if (window.html2canvas && typeof createA4CanvasFromBox === 'function') {
+            // Ensure any contact SVGs inside this box are inlined and
+            // converted to PNG data URLs so html2canvas can capture them.
+            // let _tempId = null;
+            // try {
+            //   if (!box.id) {
+            //     _tempId = 'export_tmp_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
+            //     box.id = _tempId;
+            //   }
+            //   const sel = `#${box.id} .contact-icon img`;
+            //   try { await inlineSvgAsDataUrl(sel, { preferDataUrl: true, color: footerTextColor }); } catch(e){ console.warn('inlineSvgAsDataUrl failed for box', e); }
+            //   try { await convertAnySvgImagesToPng(sel, 28); } catch(e){ console.warn('convertAnySvgImagesToPng failed for box', e); }
+            // } catch(e) {
+            //   console.warn('Error preparing contact icons for snapshot', e);
+            // }
+
+          let _tempId = null;
+        try {
+          if (!box.id) {
+            _tempId = 'export_tmp_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
+            box.id = _tempId;
+          }
+
+          const sel = `#${box.id} .contact-icon img`;
+
+          try {
+            await inlineSvgAsDataUrl(sel, { preferDataUrl: true, color: footerTextColor });
+          } catch(e){
+            console.warn('inlineSvgAsDataUrl failed for box', e);
+          }
+
+          try {
+            await convertAnySvgImagesToPng(sel, 28);
+          } catch(e){
+            console.warn('convertAnySvgImagesToPng failed for box', e);
+          }
+
+          // ⭐ VERY IMPORTANT — WAIT FOR RENDER
+          await new Promise(r => setTimeout(r, 150));
+
+        } catch(e) {
+          console.warn('Error preparing contact icons for snapshot', e);
+        }
+
+
+
+
+
+        try {
+          if (typeof _tempId !== 'undefined' && _tempId) box.removeAttribute('id');
+        } catch(e) {
+          console.warn('Error cleaning up temporary id for snapshot', e);
+        }
+
+
+
+
+
+
+            const snapA4 = await createA4CanvasFromBox(box, bgToUse);
+            if (snapA4 && snapA4.width && snapA4.height) {
+              const snapData = snapA4.toDataURL("image/jpeg", 0.95);
+              if (!storePdf) {
+                storePdf = new jsPDF("p", "mm", "a4");
+              } else {
+                storePdf.addPage();
+              }
+              storePdf.addImage(snapData, "JPEG", 0, 0, 210, 297);
+              langCounts[langCode] = (langCounts[langCode] || 0) + 1;
+              // small throttle for UI update
+              await new Promise(r => setTimeout(r, 150));
+                // cleanup temporary id if we set one
+                try { if (typeof _tempId !== 'undefined' && _tempId) box.removeAttribute('id'); } catch(e) {}
+                // snapshot saved, skip manual canvas composition below
+                continue;
+            }
+          }
+        } catch (e) {
+          console.warn('A4 snapshot via createA4CanvasFromBox failed, falling back to manual render', e);
+        }
+
+        // Fallback: build A4 canvas manually (background, logos, footer drawing)
         const canvas = document.createElement("canvas");
         canvas.width = A4_W;
         canvas.height = A4_H;
@@ -2341,7 +2640,7 @@ async function downloadAllPerfectA4() {
             const loadedImgs = await Promise.all(logoImgs.map(imgEl => new Promise(res => {
               try {
                 const im = new Image();
-                im.crossOrigin = 'anonymous';
+                // im.crossOrigin = 'anonymous';
                 im.onload = () => res({ img: im, el: imgEl, ok: true });
                 im.onerror = () => {
                   console.warn('Logo image failed to load for export:', imgEl.src || imgEl.getAttribute('src'));
@@ -2380,6 +2679,37 @@ async function downloadAllPerfectA4() {
           console.warn('Error while rendering draggable logos to canvas:', e);
         }
 
+        // If this page is the main editor `templateBox`, capture the live DOM
+        // rendering (which may include positioned HTML elements) via html2canvas
+        // and paint that snapshot onto the A4 canvas so the exported PDF
+        // matches the live preview exactly.
+        try {
+          const isMainEditorBox = (box.id === 'templateBox' || box.getAttribute('id') === 'templateBox');
+          // if (isMainEditorBox && window.html2canvas) {
+          if (false && isMainEditorBox && window.html2canvas) {
+            // capture at a scale that maps box width -> A4 drawW
+            const boxRect = box.getBoundingClientRect();
+            const targetScale = Math.max(1, Math.floor((A4_W / (boxRect.width || 1))));
+            const canvasSnap = await html2canvas(box, { backgroundColor: null, scale: Math.min(6, targetScale) });
+            const snapImg = new Image();
+            snapImg.crossOrigin = 'anonymous';
+            snapImg.src = canvasSnap.toDataURL('image/png');
+            await new Promise(r => { snapImg.onload = r; snapImg.onerror = r; });
+
+            // compute destination placement to center the snapshot inside A4
+            const snapRatio = Math.min(A4_W / snapImg.width, A4_H / snapImg.height);
+            const snapW = Math.round(snapImg.width * snapRatio);
+            const snapH = Math.round(snapImg.height * snapRatio);
+            const snapX = Math.round((A4_W - snapW) / 2);
+            const snapY = Math.round((A4_H - snapH) / 2);
+
+            try { ctx.drawImage(snapImg, snapX, snapY, snapW, snapH); }
+            catch (err) { console.warn('Failed to draw live snapshot onto A4 canvas', err); }
+          }
+        } catch (err) {
+          console.warn('html2canvas snapshot for A4 failed', err);
+        }
+
         ctx.textAlign = "left";
         ctx.textBaseline = "middle";
 
@@ -2409,8 +2739,12 @@ async function downloadAllPerfectA4() {
         const footerY = Math.max(0, cappedFooterY - footerNudgeUpPx);
 
         ctx.font = `900 ${fontSize}px "${fontFamily}", "NotoSans", Arial, sans-serif`;
-        ctx.fillStyle = footerTextColor;
-        ctx.strokeStyle = footerTextColor;
+        // ctx.fillStyle = footerTextColor;
+        // Always draw solid dark badge for visibility
+        ctx.fillStyle = "#000000";
+        ctx.fill();
+        // ctx.strokeStyle = footerTextColor;
+        ctx.strokeStyle = '#ffffff';
         ctx.lineWidth = 1.4;
 
         const addressPart = hasPhone ? `${footerAddress} | ` : footerAddress;
@@ -2431,48 +2765,36 @@ async function downloadAllPerfectA4() {
         ctx.fillText(addressPart, x, footerY);
         x += addressWidth;
 
-        if (hasPhone && iconSize > 0 && contactIconLoaded && contactIcon) {
+        if (hasPhone && iconSize > 0) {
           const iconX = x;
           const iconY = footerY - iconSize / 2;
-          try {
-            ctx.drawImage(contactIcon, iconX, iconY, iconSize, iconSize);
-          } catch (err) {
-            console.warn("Could not draw contactIcon image onto canvas, using fallback drawing:", err);
-            ctx.save();
-            ctx.beginPath();
-            ctx.arc(x + iconSize/2, footerY, iconSize/2, 0, Math.PI*2);
-            ctx.fillStyle = footerTextColor;
-            ctx.fill();
-            ctx.restore();
-
-            ctx.save();
-            ctx.strokeStyle = '#fff';
-            ctx.lineWidth = Math.max(2, iconSize * 0.13);
-            ctx.lineCap = 'round';
-            let cx = x + iconSize/2, cy = footerY, r = iconSize*0.28;
-            ctx.beginPath();
-            ctx.arc(cx, cy, r, Math.PI*0.75, Math.PI*1.25, false);
-            ctx.stroke();
-            ctx.restore();
-          }
-          x += iconSize + iconGap;
-        } else if (hasPhone && iconSize > 0) {
+          // Always draw a solid circular badge for the contact icon (ensures visibility)
           ctx.save();
           ctx.beginPath();
-          ctx.arc(x + iconSize/2, footerY, iconSize/2, 0, Math.PI*2);
+          ctx.arc(iconX + iconSize / 2, footerY, iconSize / 2, 0, Math.PI * 2);
           ctx.fillStyle = footerTextColor;
           ctx.fill();
           ctx.restore();
 
+          // Draw simple handset stroke in white on top
           ctx.save();
-          ctx.strokeStyle = '#fff';
+          ctx.strokeStyle = '#ffffff';
           ctx.lineWidth = Math.max(2, iconSize * 0.13);
           ctx.lineCap = 'round';
-          let cx = x + iconSize/2, cy = footerY, r = iconSize*0.28;
+          const cx = iconX + iconSize / 2, cy = footerY, r = iconSize * 0.28;
           ctx.beginPath();
-          ctx.arc(cx, cy, r, Math.PI*0.75, Math.PI*1.25, false);
+          ctx.arc(cx, cy, r, Math.PI * 0.75, Math.PI * 1.25, false);
           ctx.stroke();
           ctx.restore();
+
+          // If the prepared SVG blob loaded, attempt to draw it over the badge
+          if (contactIconLoaded && contactIcon) {
+            try {
+              ctx.drawImage(contactIcon, iconX, iconY, iconSize, iconSize);
+            } catch (err) {
+              console.warn('Could not draw contactIcon image onto canvas (overlay), continuing with painted badge', err);
+            }
+          }
 
           x += iconSize + iconGap;
         }
