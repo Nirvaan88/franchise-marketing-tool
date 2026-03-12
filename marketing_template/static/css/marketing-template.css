@@ -1,10 +1,10 @@
-@font-face { font-family: "NotoSans"; src: url("fonts/NotoSans-Regular.ttf") format("truetype"); }
-@font-face { font-family: "NotoSansDeva"; src: url("fonts/NotoSansDevanagari-Regular.ttf") format("truetype"); }
-@font-face { font-family: "NotoSansGuj"; src: url("fonts/NotoSansGujarati-Regular.ttf") format("truetype"); }
-@font-face { font-family: "NotoSansTamil"; src: url("fonts/NotoSansTamil-Regular.ttf") format("truetype"); }
-@font-face { font-family: "NotoSansBeng"; src: url("fonts/NotoSansBengali-Regular.ttf") format("truetype"); }
-@font-face { font-family: "NotoSansKannada"; src: url("fonts/NotoSansKannada-Regular.ttf") format("truetype"); }
-@font-face { font-family: "NotoSansTelugu"; src: url("fonts/NotoSansTelugu-Regular.ttf") format("truetype"); }
+@font-face { font-family: "NotoSans"; src: url("/static/fonts/NotoSans-Regular.ttf") format("truetype"); }
+@font-face { font-family: "NotoSansDeva"; src: url("/static/fonts/NotoSansDevanagari-Regular.ttf") format("truetype"); }
+@font-face { font-family: "NotoSansGuj"; src: url("/static/fonts/NotoSansGujarati-Regular.ttf") format("truetype"); }
+@font-face { font-family: "NotoSansTamil"; src: url("/static/fonts/NotoSansTamil-Regular.ttf") format("truetype"); }
+@font-face { font-family: "NotoSansBeng"; src: url("/static/fonts/NotoSansBengali-Regular.ttf") format("truetype"); }
+@font-face { font-family: "NotoSansKannada"; src: url("/static/fonts/NotoSansKannada-Regular.ttf") format("truetype"); }
+@font-face { font-family: "NotoSansTelugu"; src: url("/static/fonts/NotoSansTelugu-Regular.ttf") format("truetype"); }
 
 .lang-en { font-family: "NotoSans", Arial, sans-serif; }
 .lang-hi { font-family: "NotoSansDeva", "NotoSans", sans-serif; }
@@ -218,7 +218,7 @@ h1 {
 .upload-card-heading {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 0;
   margin-bottom: 10px;
 }
 
@@ -581,25 +581,32 @@ h1 {
   vertical-align: baseline !important;
 }
 
+/* .store-address{
+  font-weight:700;
+  text-shadow:none;
+} */
+
+
+
 .separator {
   display: inline !important;
   font-weight: 900;
   font-size: 28px;
   line-height: 1 !important;
   color: #1a1a1a;
-  margin: 0 4px !important;
-  -webkit-text-stroke: 0.2px #000;
-  text-shadow: 0.3px 0.3px 0 #000, -0.3px -0.3px 0 #000;
+  margin: 0 !important;
+  /* -webkit-text-stroke: 0.2px #000; */
+  /* text-shadow: 0.3px 0.3px 0 #000, -0.3px -0.3px 0 #000; */
   vertical-align: baseline !important;
 }
 
 .contact-icon {
   display: inline-flex !important;
-  width: 28px !important;
-  height: 28px !important;
+  width: 18px !important;
+  height: 18px !important;
   vertical-align: middle !important;
   line-height: 1 !important;
-  margin: 0 10px 0 6px !important;
+  margin: 0 !important;
   align-items: center !important;
   justify-content: center !important;
 }
@@ -615,6 +622,15 @@ h1 {
   background: transparent !important;
 }
 
+/* Group wrapper so separator, icon and number are treated as one flex item */
+.contact-group {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
 .store-mobile {
   display: inline !important;
   color: #000000;
@@ -622,8 +638,8 @@ h1 {
   font-size: inherit;
   line-height: 1 !important;
   margin: 0 !important;
-  -webkit-text-stroke: 0.5px #000;
-  text-shadow: 0.5px 0.5px 0 #000, -0.5px -0.5px 0 #000;
+  /* -webkit-text-stroke: 0.5px #000;
+  text-shadow: 0.5px 0.5px 0 #000, -0.5px -0.5px 0 #000; */
   vertical-align: baseline !important;
   white-space: nowrap !important;
 }
@@ -633,8 +649,8 @@ h1 {
 #storeFooterNameFinal {
   position: absolute;
   bottom: 48px !important;
-  left: 50%;
-  transform: translateX(-52%);
+  left: 40%;
+  transform: translateX(-55%) !important;
   text-align: center;
   color: #000;
   font-size: 18px;
@@ -652,6 +668,9 @@ h1 {
   line-height: 1 !important;
 }
 
+#storeFooterNameFinal{
+display:none !important;
+}
 /* When the editor is set to 'More Down', force the footer further down
    (use a higher-specificity selector with !important so it overrides
    the default placement applied elsewhere). */
@@ -675,10 +694,26 @@ h1 {
   margin: 0 !important;
   padding: 0 !important;
   vertical-align: middle !important;
-  -webkit-text-stroke: 0.5px #000;
-  text-shadow: 0.5px 0.5px 0 #000, -0.5px -0.5px 0 #000;
+  /* -webkit-text-stroke: 0.5px #000; */
+  /* text-shadow: 0.5px 0.5px 0 #000,  */
+  /* -0.5px -0.5px 0 #000; */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+
+
+.store-address{
+  display:inline;
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight:700;
+  color:#000;
+  white-space:nowrap;
+  margin:0;
+  padding:0;
+  line-height:1;
+  text-shadow:none;
+  -webkit-text-stroke:0;
 }
 
 /* force all footers a bit more left — quick override */
@@ -707,8 +742,8 @@ h1 {
 #storeFooterNameFinal {
   position: absolute;
   bottom: -10mm !important;
-  left: 50% !important;
-  transform: translateX(-41%) !important; /* moved further left */
+  left: 40% !important;
+  transform: translateX(-55%) !important; /* adjusted per request */
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -716,15 +751,11 @@ h1 {
   white-space: nowrap !important;
   width: max-content;
   max-width: 92%;
-  gap: 4px !important;
+  gap: 12px !important;
   font-size: 18px !important;
   color: #000 !important;
   font-weight: 900 !important;
 }
-
-
-
-
 
 
 /* Address styling */
@@ -752,7 +783,8 @@ h1 {
   font-size: 24px;
   line-height: 1 !important;
   color: #000000;
-  margin: 0 -2px 0 0 !important;
+  margin: 0 !important;
+  /* separator kept flush with adjacent elements */
   padding: 0 !important;
   -webkit-text-stroke: 0px;
   text-shadow: none;
@@ -767,7 +799,7 @@ h1 {
   display: inline-flex !important;
   width: 28px !important;
   height: 28px !important;
-  margin: 0 6px 0 6px !important;
+  margin: 0 0 0 8px !important;
   vertical-align: middle !important;
   line-height: 1 !important;
   opacity: 1 !important;
@@ -782,32 +814,41 @@ h1 {
 
 .contact-icon img {
   display: block !important;
-  width: 28px !important;
-  height: 28px !important;
+  width: 18px !important;
+  height: 18px !important;
   opacity: 1 !important;
   visibility: visible !important;
   filter: none !important;
   object-fit: contain !important;
   background: transparent !important;
   background-color: transparent !important;
-  border: none !important;
+
 }
 
-/* Mobile number */
+/* Inline SVG sizing when we replace the <img> with inline SVG */
+.contact-icon svg {
+  display: block !important;
+  height: 18px !important;
+  width: auto !important;
+  max-height: 18px !important;
+}
+
+/* Mobile number: bold, same font as address, but without extra strokes/shadows */
 .store-mobile {
   display: inline !important;
-  color: #000000;
-  font-family: 'Arial', 'Helvetica', sans-serif !important;
-  font-weight: 900;
-  font-size: inherit;
+  color: #000000 !important;
+  font-family: Arial, Helvetica, sans-serif !important;
+  font-weight: 700 !important;
+  font-size: inherit !important;
   line-height: 1 !important;
-  margin: 0 0 0 -2px !important;
-  -webkit-text-stroke: 0.5px #000;
-  text-shadow: 0.5px 0.5px 0 #000, -0.5px -0.5px 0 #000;
+  margin: 0 !important;
+  /* remove heavy strokes/shadows so number matches address visually */
+  -webkit-text-stroke: 0 !important;
+  text-shadow: none !important;
   flex: 0 0 auto;
   white-space: nowrap !important;
   vertical-align: middle !important;
-  letter-spacing: -0.5px !important;
+  letter-spacing: normal !important;
 }
 
 .badge-debug {
@@ -872,4 +913,114 @@ h1 {
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+/* Hide final/clone footer inside the live editor box to avoid double-render */
+#templateBox #storeFooterNameFinal {
+  display: none !important;
+}
+
+/* Emergency safeguard: if duplicate .store-address/.separator/.store-mobile
+   nodes appear in the live editor, hide all but the first occurrence so
+   users don't see double-rendered footer text. This is non-destructive
+   and only affects the live editor view. */
+#templateBox .store-address:not(:first-of-type),
+#templateBox .separator:not(:first-of-type),
+#templateBox .store-mobile:not(:first-of-type) {
+  display: none !important;
+}
+
+/* Remove gaps between separator, contact icon, address and mobile number */
+#storeFooterName .separator,
+#storeFooterNameFinal .separator,
+#templateBox .separator {
+  margin: 0 12px !important;
+}
+#storeFooterName .contact-icon,
+#storeFooterNameFinal .contact-icon,
+#templateBox .contact-icon {
+  margin: 0 !important;
+}
+#storeFooterName .store-mobile,
+#storeFooterNameFinal .store-mobile {
+  margin-left: 0 !important;
+}
+#storeFooterName .store-address,
+#storeFooterNameFinal .store-address {
+  margin-right: 0 !important;
+}
+.contact-group { gap: 0 !important; }
+
+/* Zero/near-zero spacing for footer inline elements */
+#storeFooterName,
+#storeFooterNameFinal {
+  gap: 0 !important;
+}
+
+#storeFooterName .separator,
+#storeFooterNameFinal .separator,
+#templateBox .separator {
+  font-size: 18px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+#storeFooterName .contact-icon,
+#storeFooterNameFinal .contact-icon,
+#templateBox .contact-icon {
+  margin: 0 6px 0 0 !important;
+  width: 18px !important;
+  height: 18px !important;
+}
+
+#storeFooterName .store-mobile,
+#storeFooterNameFinal .store-mobile {
+  margin-left: 3px !important;
+  letter-spacing: normal !important;
+}
+
+/* Strong footer-only overrides: force no horizontal spacing between
+   the address, separator and contact icon in the rendered footer. */
+/* Footer spacing: small consistent gaps (3px) between address, separator and contact */
+#storeFooterName .store-address,
+#storeFooterNameFinal .store-address {
+  margin-right: 3px !important;
+}
+#storeFooterName .separator,
+#storeFooterNameFinal .separator {
+  margin: 0 3px !important;
+  padding: 0 !important;
+}
+#storeFooterName .contact-icon,
+#storeFooterNameFinal .contact-icon {
+  margin: 0 3px 0 0 !important;
+}
+#storeFooterName .contact-group,
+#storeFooterNameFinal .contact-group {
+  gap: 3px !important;
+}
+
+/* Collapse any inter-element whitespace in the footer by setting the
+   container font-size to 0, then restore readable font-size on the
+   inline children. This removes visible gaps caused by text nodes or
+   templating whitespace. */
+#storeFooterName, #storeFooterNameFinal {
+  font-size: 0 !important;
+}
+#storeFooterName .store-address,
+#storeFooterNameFinal .store-address,
+#storeFooterName .separator,
+#storeFooterNameFinal .separator,
+#storeFooterName .contact-icon,
+#storeFooterNameFinal .contact-icon,
+#storeFooterName .store-mobile,
+#storeFooterNameFinal .store-mobile {
+  font-size: 18px !important;
+  display: inline-block !important;
+  vertical-align: middle !important;
+}
+
+#storeFooterName .store-address,
+#storeFooterNameFinal .store-address {
+  margin-right: 0 !important;
 }

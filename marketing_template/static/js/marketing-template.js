@@ -106,23 +106,23 @@ async function renderFileToA4DataUrl(file) {
   const A4_W = 2480;
   const A4_H = 3508;
 
-  const canvas = document.createElement("canvas");
-  canvas.width = A4_W;
-  canvas.height = A4_H;
+  // const canvas = document.createElement("canvas");
+  // canvas.width = A4_W;
+  // canvas.height = A4_H;
 
-  const ctx = canvas.getContext("2d");
-  ctx.fillStyle = "#ffffff";
-  ctx.fillRect(0, 0, A4_W, A4_H);
+  // const ctx = canvas.getContext("2d");
+  // ctx.fillStyle = "#ffffff";
+  // ctx.fillRect(0, 0, A4_W, A4_H);
 
-  const ratio = Math.min(A4_W / img.width, A4_H / img.height);
-  const drawW = img.width * ratio;
-  const drawH = img.height * ratio;
-  const dx = (A4_W - drawW) / 2;
-  const dy = (A4_H - drawH) / 2;
+  // const ratio = Math.min(A4_W / img.width, A4_H / img.height);
+  // const drawW = img.width * ratio;
+  // const drawH = img.height * ratio;
+  // const dx = (A4_W - drawW) / 2;
+  // const dy = (A4_H - drawH) / 2;
 
-  ctx.imageSmoothingEnabled = true;
-  ctx.imageSmoothingQuality = "high";
-  ctx.drawImage(img, dx, dy, drawW, drawH);
+  // ctx.imageSmoothingEnabled = true;
+  // ctx.imageSmoothingQuality = "high";
+  // ctx.drawImage(img, dx, dy, drawW, drawH);
 
   // HD PNG data URL
   return canvas.toDataURL("image/png", 1.0);
@@ -175,10 +175,196 @@ async function createA4CanvasFromBox(box, bgImage /* optional Image */) {
   const A4_W = 2480, A4_H = 3508;
   // Capture the live DOM of the box at a reasonable scale
   let snapCanvas;
+  // Prepare a clone for export so we can strip text-strokes/shadows which
+  // html2canvas tends to rasterize fuzzily. We render the clone offscreen
+  // and ask html2canvas to scale using devicePixelRatio for crisper text.
+  const computeScale = () => {
+    const boxWidth = (box.getBoundingClientRect && box.getBoundingClientRect().width) || box.offsetWidth || 794;
+    const base = Math.max(1, Math.floor(A4_W / (boxWidth || 1)));
+    const dpr = (window.devicePixelRatio || 1);
+    return Math.min(6, Math.max(1, Math.round(base * dpr)));
+  };
+
+  async function createExportClone(orig) {
+    const clone = orig.cloneNode(true);
+    // Create a uniquely-identifiable id for the clone so we can
+    // inject temporary stylesheet copies of rules that target
+    // `#templateBox` without touching the live editor or duplicating
+    // global ids.
+    const exportId = 'export_clone_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
+    if (clone.id) {
+      // remove original id to avoid duplicate-id JavaScript lookups
+      clone.removeAttribute('id');
+    }
+    clone.id = exportId;
+
+    // Inject temporary stylesheet rules that mirror any rules targeting
+    // #templateBox so the clone renders identically. We attempt to
+    // read available stylesheets and copy rules that reference
+    // `#templateBox`, replacing that token with the clone id.
+    let injectedStyle = null;
+    try {
+      let cssText = '';
+      for (const sheet of Array.from(document.styleSheets)) {
+        try {
+          const rules = sheet.cssRules || sheet.rules;
+          if (!rules) continue;
+          for (const r of Array.from(rules)) {
+            try {
+              const text = r.cssText || '';
+              if (text.indexOf('#templateBox') !== -1) {
+                cssText += text.replace(/#templateBox/g, `#${exportId}`) + '\n';
+              }
+            } catch (e) { /* ignore rule read errors */ }
+          }
+        } catch (e) { /* ignore cross-origin sheets */ }
+      }
+      if (cssText) {
+        injectedStyle = document.createElement('style');
+        injectedStyle.setAttribute('data-export-style', exportId);
+        injectedStyle.textContent = cssText;
+        document.head.appendChild(injectedStyle);
+      }
+    } catch (e) {
+      console.warn('Failed to inject templateBox styles for export clone', e);
+      injectedStyle = null;
+    }
+    // remove any copied footer elements from the cloned DOM so we don't
+    // end up with both the original footer content (copied by cloneNode)
+    // and a programmatically-inserted final footer (created later by
+    // syncFinalLayerFor). This prevents double-rendering of the address.
+    clone.querySelectorAll('#storeFooterName, #storeFooterNameFinal').forEach(el => el.remove());
+    // size the clone to match the original box so html2canvas computes layout
+    const rect = orig.getBoundingClientRect();
+    clone.style.width = rect.width + 'px';
+    clone.style.height = rect.height + 'px';
+    clone.style.boxSizing = 'border-box';
+    clone.style.position = 'fixed';
+    clone.style.left = '-9999px';
+    clone.style.top = '-9999px';
+    clone.style.zIndex = '999999';
+    clone.style.background = window.getComputedStyle(orig).background || 'transparent';
+
+    // neutralize heavy strokes/shadows and make text wrap-friendly for export
+    clone.querySelectorAll('.store-address, .separator, .store-mobile').forEach(el => {
+      el.style.setProperty('text-shadow', 'none', 'important');
+      el.style.setProperty('-webkit-text-stroke', '0px', 'important');
+      el.style.setProperty('text-stroke', '0px', 'important');
+      el.style.setProperty('filter', 'none', 'important');
+      el.style.setProperty('white-space', 'normal', 'important');
+      el.style.setProperty('overflow-wrap', 'break-word', 'important');
+      el.style.setProperty('word-break', 'break-word', 'important');
+      el.style.setProperty('font-weight', '700', 'important');
+    });
+
+    document.body.appendChild(clone);
+
+    // Prepare images inside the clone for reliable html2canvas capture:
+    // - Inline SVG images as data URLs
+    // - Convert any remaining SVG <img> to PNG
+    // - Ensure <img> elements use crossOrigin where possible
+    try {
+      const footerColor = (document.getElementById && document.getElementById('footerTextColor') && document.getElementById('footerTextColor').value) || '#000000';
+      try {
+        if (typeof inlineSvgAsDataUrl === 'function') {
+          await inlineSvgAsDataUrl(`#${exportId} .contact-icon img`, { preferDataUrl: true, color: footerColor });
+        }
+      } catch(e) { console.warn('inlineSvgAsDataUrl failed for export clone', e); }
+
+      try {
+        if (typeof convertAnySvgImagesToPng === 'function') {
+          await convertAnySvgImagesToPng(`#${exportId} .contact-icon img`, 28);
+        }
+      } catch(e) { console.warn('convertAnySvgImagesToPng failed for export clone', e); }
+
+      try {
+        const imgs = Array.from(clone.querySelectorAll('img'));
+        imgs.forEach(img => {
+          try { img.crossOrigin = 'anonymous'; } catch(e){}
+        });
+      } catch(e) { /* ignore */ }
+
+      // small pause to allow browser to render data-URL replacements
+      await new Promise(r => setTimeout(r, 80));
+    } catch(e) {
+      console.warn('Failed preparing images inside export clone', e);
+    }
+
+      // diagnostic: log how many footer ids exist in the document after append
+      try { console.log('Footer count after clone append:', document.querySelectorAll('#storeFooterName, #storeFooterNameFinal').length); } catch(e){/*ignore*/}
+
+      // Ensure the clone has a proper final footer identical to the original
+      // This copies the live footer content into the cloned export node so
+      // exported PDFs match the generated templates' footer placement.
+      try {
+        // create final overlay/footer inside the clone
+        if (typeof syncFinalLayerFor === 'function') syncFinalLayerFor(clone);
+        // copy footer content & styles from original into clone's final footer
+        if (typeof cloneExactFooter === 'function') cloneExactFooter(orig, clone);
+      } catch (e) { console.warn('Failed to sync footer into export clone', e); }
+    // attach cleanup meta so caller can remove injected style later
+    try { if (injectedStyle) clone._exportInjectedStyle = injectedStyle; } catch(e){}
+    return clone;
+  }
+
   try {
-    snapCanvas = await html2canvas(box, { backgroundColor: null, scale: Math.min(6, Math.max(1, Math.floor(A4_W / (box.getBoundingClientRect().width || 1)))) });
+    const exportClone = await createExportClone(box);
+
+
+    // ---- Ensure footer address exists in export clone ----
+    const origFooter = box.querySelector("#storeFooterName");
+    const cloneFooter = exportClone.querySelector("#storeFooterNameFinal") || exportClone.querySelector("#storeFooterName");
+
+    if (origFooter && cloneFooter) {
+      const addr = origFooter.querySelector(".store-address");
+      const mob  = origFooter.querySelector(".store-mobile");
+
+      cloneFooter.innerHTML =
+        `<span class="store-address">${addr ? addr.textContent : ""}</span>` +
+        (mob ? `<span class="separator">|</span>${getContactIconHtml()}<span class="store-mobile">${mob.textContent}</span>` : "");
+    }
+        
+      // Sanity: ensure only one visible store-address exists in the clone.
+      // Keep the first occurrence (if any) and hide/remove others so the
+      // final exported canvas shows the address only once.
+      try {
+        const addrs = Array.from(exportClone.querySelectorAll('.store-address'));
+        if (addrs.length > 1) {
+          // keep the first, hide the rest
+          addrs.slice(1).forEach(a => {
+            a.style.setProperty('display', 'none', 'important');
+          });
+        }
+        // also ensure separators / mobile numbers aren't duplicated
+        const seps = Array.from(exportClone.querySelectorAll('.separator'));
+        if (seps.length > 1) seps.slice(1).forEach(s => s.style.setProperty('display','none','important'));
+        const phones = Array.from(exportClone.querySelectorAll('.store-mobile'));
+        if (phones.length > 1) phones.slice(1).forEach(p => p.style.setProperty('display','none','important'));
+      } catch(e) { /* ignore sanity errors */ }
+
+    try {
+      await new Promise(r => setTimeout(r, 60));
+
+      snapCanvas = await html2canvas(exportClone, { backgroundColor: null, scale: computeScale(), useCORS: true });
+    } catch (err) {
+      console.warn('createA4CanvasFromBox: html2canvas on clone failed, falling back to original box', err);
+        try {
+        snapCanvas = await html2canvas(box, { backgroundColor: null, scale: Math.min(6, Math.max(1, Math.floor(A4_W / (box.getBoundingClientRect().width || 1)))) });
+      } catch (err2) {
+        console.warn('createA4CanvasFromBox: html2canvas failed, falling back to scale 2', err2);
+        snapCanvas = await html2canvas(box, { backgroundColor: null, scale: 2 });
+      }
+    }
+    // remove clone once capture is complete and also clean up any
+    // injected temporary stylesheet we added for the export clone.
+    try {
+      if (exportClone._exportInjectedStyle && exportClone._exportInjectedStyle.parentNode) {
+        exportClone._exportInjectedStyle.parentNode.removeChild(exportClone._exportInjectedStyle);
+      }
+    } catch (e) { /* ignore cleanup errors */ }
+    try { exportClone.parentNode && exportClone.parentNode.removeChild(exportClone); } catch(e){/*ignore*/}
   } catch (err) {
-    console.warn('createA4CanvasFromBox: html2canvas failed, falling back to simple capture', err);
+    console.warn('createA4CanvasFromBox: export clone creation failed, using fallback capture', err);
     snapCanvas = await html2canvas(box, { backgroundColor: null, scale: 2 });
   }
 
@@ -372,13 +558,105 @@ function makeDraggable(el) {
 // We default to the same gold badge used in the static SVG.
 const CONTACT_ICON_BASE64 = createColoredContactSvg('#d8a23f');
 
+// In-memory inline SVG (when fetched successfully). Populated asynchronously.
+let CONTACT_ICON_SVG = null;
+
+// Try to fetch the SVG source and inline it into existing `.contact-icon` elements.
+// Candidate filenames for contact SVG (tries these in order)
+const CONTACT_SVG_CANDIDATES = [
+  '/static/images/contact-logo.svg',
+  '/static/images/Contact icon.svg',
+  '/static/images/Contact%20icon.svg',
+  '/static/images/Contact_icon.svg',
+  '/static/images/Contact-icon.svg'
+];
+
+async function tryFetchFirstSvg(origin) {
+  origin = origin || ((typeof window !== 'undefined' && window.location && window.location.origin) ? window.location.origin : '');
+  for (const path of CONTACT_SVG_CANDIDATES) {
+    try {
+      const resp = await fetch(origin + path);
+      if (resp && resp.ok) {
+        const txt = await resp.text();
+        return { path: path, text: txt };
+      }
+    } catch (e) { /* try next */ }
+  }
+  return null;
+}
+
+(async function loadContactSvgInline() {
+  try {
+    const origin = (typeof window !== 'undefined' && window.location && window.location.origin) ? window.location.origin : '';
+    const fetched = await tryFetchFirstSvg(origin);
+    if (!fetched) return;
+    let svgText = fetched.text;
+    try {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(svgText, 'image/svg+xml');
+      const svgEl = doc.querySelector('svg');
+      if (svgEl) {
+        // If no viewBox is present but width/height exist, synthesize a viewBox
+        if (!svgEl.hasAttribute('viewBox')) {
+          const w = svgEl.getAttribute('width');
+          const h = svgEl.getAttribute('height');
+          if (w && h) {
+            // strip non-digits (like px) and fallback to numbers
+            const wnum = parseFloat(String(w).replace(/[^0-9.]/g, '')) || null;
+            const hnum = parseFloat(String(h).replace(/[^0-9.]/g, '')) || null;
+            if (wnum && hnum) {
+              svgEl.setAttribute('viewBox', `0 0 ${wnum} ${hnum}`);
+            }
+          }
+        }
+        // Remove fixed width/height so CSS can size it responsively
+        if (svgEl.hasAttribute('width')) svgEl.removeAttribute('width');
+        if (svgEl.hasAttribute('height')) svgEl.removeAttribute('height');
+        // Ensure a sensible preserveAspectRatio
+        if (!svgEl.hasAttribute('preserveAspectRatio')) svgEl.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+        const serializer = new XMLSerializer();
+        svgText = serializer.serializeToString(svgEl);
+      }
+    } catch (e) {
+      console.warn('Failed to normalize fetched SVG', e);
+    }
+    CONTACT_ICON_SVG = svgText;
+    // Replace any existing .contact-icon content (img) with inline svg for crisp scaling
+    document.querySelectorAll('.contact-icon').forEach(el => {
+      try {
+        el.innerHTML = CONTACT_ICON_SVG;
+        const svg = el.querySelector('svg');
+        if (svg) {
+          svg.setAttribute('height', '18');
+          svg.setAttribute('width', 'auto');
+          svg.style.height = '18px';
+          svg.style.width = 'auto';
+          svg.style.maxHeight = '18px';
+          svg.style.display = 'block';
+        }
+      } catch (e) { console.warn('Failed to inline contact SVG into element', e); }
+    });
+  } catch (e) {
+    console.warn('Failed to fetch contact SVG inline', e);
+  }
+})();
+
 function getContactIconHtml() {
   // Build the static contact SVG path from the current origin so
   // the script works whether the app is served as http://127.0.0.1:8000
   // or another host/port.
   const origin = (typeof window !== 'undefined' && window.location && window.location.origin) ? window.location.origin : '';
-  const src = origin + '/static/images/contact-logo.svg';
-  return `<span class="contact-icon"><img src="${src}" alt="phone" aria-hidden="true"></span>`;
+  const src = origin + CONTACT_SVG_CANDIDATES[0];
+
+  // If we already loaded the SVG text, return it inline for crisp rendering.
+  if (CONTACT_ICON_SVG) {
+    return `<span class="contact-icon">${CONTACT_ICON_SVG}</span>`;
+  }
+
+  // Fallback to an <img> tag which will later be replaced when inline SVG is available.
+  // Use a small colored circular badge (data URL) so it appears like the screenshot
+  const badge = createColoredContactSvg('#1d2d62'); // dark navy
+  return `<span class="contact-icon"><img src="${badge}" alt="phone" aria-hidden="true"></span>`;
 }
 
 function buildContactSegment(phoneText) {
@@ -437,8 +715,8 @@ async function inlineSvgAsDataUrl(imgSelector, options = {}) {
     });
   }
 
-  // preferred candidate (application static SVG)
-  const appSvgPath = '/static/images/contact-logo.svg';
+  // preferred candidate paths (application static SVG)
+  const appSvgPathCandidates = CONTACT_SVG_CANDIDATES.slice();
 
   // If a forced color is provided, prefer createColoredContactSvg to recolor ring
   const coloredDataUrl = forcedColor ? createColoredContactSvg(forcedColor) : null;
@@ -461,11 +739,13 @@ async function inlineSvgAsDataUrl(imgSelector, options = {}) {
     finalSrc = CONTACT_ICON_BASE64;
   }
 
-  // If still no finalSrc, test the app static path (last resort)
+  // If still no finalSrc, test the app static path candidates (last resort)
   if (!finalSrc) {
     try {
-      const ok = await testLoad(appSvgPath);
-      if (ok) finalSrc = appSvgPath;
+      for (const p of appSvgPathCandidates) {
+        const ok = await testLoad(p);
+        if (ok) { finalSrc = p; break; }
+      }
     } catch(e) { /* ignore */ }
   }
 
@@ -481,6 +761,24 @@ async function inlineSvgAsDataUrl(imgSelector, options = {}) {
   // apply finalSrc to all matched img elements
   nodes.forEach(img => {
     try {
+      // If we already have the full SVG text loaded, replace the <img> with inline SVG
+      if (CONTACT_ICON_SVG) {
+        try {
+          const wrapper = img.closest('.contact-icon') || img.parentNode;
+          if (wrapper) {
+            wrapper.innerHTML = CONTACT_ICON_SVG;
+            const svg = wrapper.querySelector('svg');
+            if (svg) {
+              svg.style.height = img.style.height || '18px';
+              svg.style.width = img.style.width || 'auto';
+              svg.style.maxHeight = img.style.maxHeight || '18px';
+              svg.setAttribute('role','img');
+              svg.setAttribute('aria-hidden','true');
+            }
+          }
+          return; // done for this element
+        } catch(e) { console.warn('inlineSvgAsDataUrl: failed to replace img with inline svg', e); }
+      }
       // If we have a color and we want to recolor per element, regenerate data URL
       if (forcedColor) {
         applyImg(img, createColoredContactSvg(forcedColor));
@@ -611,6 +909,35 @@ async function convertAnySvgImagesToPng(imgSelector, size = 24) {
 function updateFooterInfo() {
   const storeNameVal = document.getElementById("footerName").value.trim() || "Store Name";
   const whatsappVal = document.getElementById("footerWhatsApp").value.trim();
+
+  // Ensure there is exactly one live footer in the editor: keep or create
+  // the `#storeFooterName` inside `#templateBox` and remove any other
+  // `#storeFooterName` / `#storeFooterNameFinal` elements elsewhere.
+  try {
+    let primary = document.querySelector('#templateBox #storeFooterName');
+    if (!primary) {
+      // if none exists inside templateBox, try to reuse any existing
+      primary = document.getElementById('storeFooterName');
+      if (primary && primary.closest && primary.closest('#templateBox')) {
+        // already fine
+      } else {
+        // create a fresh footer inside templateBox
+        const tpl = document.getElementById('templateBox');
+        if (tpl) {
+          const created = document.createElement('div');
+          created.id = 'storeFooterName';
+          tpl.insertBefore(created, tpl.firstChild || null);
+          primary = created;
+        }
+      }
+    }
+    // remove any other footer elements in the document
+    document.querySelectorAll('#storeFooterName, #storeFooterNameFinal').forEach(el => {
+      if (el === primary) return;
+      try { el.remove(); } catch(e) { try { el.parentNode && el.parentNode.removeChild(el);} catch(e2){} }
+    });
+  } catch(e) { /* ignore */ }
+
   let footerHTML = `<span class="store-address">${escapeHtml(storeNameVal)}</span>`;
   footerHTML += buildContactSegment(whatsappVal);
 
@@ -620,7 +947,7 @@ function updateFooterInfo() {
     footerEl.style.display = "inline-flex";
     footerEl.style.alignItems = "center";
     footerEl.style.justifyContent = "center";
-    footerEl.style.whiteSpace = "nowrap";
+    footerEl.style.whiteSpace = "normal";
     footerEl.style.pointerEvents = "none";
   }
 
@@ -642,8 +969,10 @@ async function adjustFooterFontSize() {
     const addr = footer.querySelector(".store-address");
     if (!addr) return;
 
-    addr.style.setProperty('white-space', 'nowrap', 'important');
-    addr.style.setProperty('display', 'inline', 'important');
+    addr.style.setProperty('white-space', 'normal', 'important');
+    addr.style.setProperty('display', 'inline-block', 'important');
+    addr.style.setProperty('overflow-wrap', 'break-word', 'important');
+    addr.style.setProperty('word-break', 'break-word', 'important');
 
     const text = (addr.textContent || "").trim();
     const length = text.length;
@@ -750,21 +1079,24 @@ function adjustFooterPosition(){
     const textLength = footer.textContent.trim().length;
     let baseBottom;
 
-    if (textLength < 80) baseBottom = 38;
-    else if (textLength < 128) baseBottom = 29;
-    else baseBottom = 28;
+    // Use smaller bottom offsets so the footer sits closer to the page edge
+    // (below decorative dividers) and avoids overlapping content above it.
+    if (textLength < 80) baseBottom = 12;
+    else if (textLength < 128) baseBottom = 9;
+    else baseBottom = 6;
 
     // If user selected the new 'more_down' option, move the address further down
     if (pos === 'more_down') {
       // Smaller bottom value moves the element closer to the bottom edge
-      if (baseBottom === 38) baseBottom = 12;
-      else if (baseBottom === 29) baseBottom = 9;
-      else baseBottom = 6;
+      // If the user chose 'more_down', push it further down slightly
+      if (baseBottom === 12) baseBottom = 8;
+      else if (baseBottom === 9) baseBottom = 6;
+      else baseBottom = 4;
     }
-
     footer.style.bottom = baseBottom + "px";
     footer.style.left = '50%';
-    footer.style.transform = 'translateX(-56%)';
+    // center precisely; use -50% to avoid small centering drift
+    footer.style.transform = 'translateX(-50%)';
     footer.style.textAlign = 'center';
     footer.style.maxWidth = '95%';
   });
@@ -794,6 +1126,9 @@ async function waitForLangFont(lang){
 /* ---------- sync final layer helper for clones (keeps background + footer) ---------- */
 function syncFinalLayerFor(box){
   if(!box) return;
+  // avoid creating a "final" footer inside the live editor box itself
+  // (syncFinalLayerFor is intended for cloned boxes used for export)
+  if (box.id === 'templateBox') return;
   let tgt = box.querySelector("[data-final-template]");
   if(!tgt){
     tgt = document.createElement("div");
@@ -822,15 +1157,34 @@ function syncFinalLayerFor(box){
     footerFinal = document.createElement("div");
     footerFinal.id = "storeFooterNameFinal";
     footerFinal.style.position = "absolute";
-    footerFinal.style.bottom = "30px";
+    // position the final footer a bit closer to the page bottom so it
+    // doesn't overlap decorative dividers or rules above it.
+    footerFinal.style.bottom = "12px";
     footerFinal.style.left = "50%";
-    footerFinal.style.transform = "translateX(-56%)";
+    // center precisely and reserve some horizontal space to avoid
+    // overlapping with right-side elements (like a QR code).
+    footerFinal.style.transform = "translateX(-50%)";
     footerFinal.style.zIndex = 20;
     footerFinal.style.pointerEvents = "none";
+    // Constrain width so the footer text won't run into side content.
+    // Leave horizontal padding for potential QR/badges on the right.
+    footerFinal.style.width = "calc(100% - 140px)";
+    footerFinal.style.maxWidth = "100%";
+    footerFinal.style.boxSizing = "border-box";
+    footerFinal.style.textAlign = "center";
+    footerFinal.style.whiteSpace = "nowrap";
+    footerFinal.style.overflow = "hidden";
+    footerFinal.style.textOverflow = "ellipsis";
+    footerFinal.style.padding = "0 8px";
     box.appendChild(footerFinal);
   }
 
-  const editorFooter = box.querySelector("#storeFooterName") || document.getElementById("storeFooterName");
+  // Only look for a footer inside this box. Using the global
+  // document.getElementById("storeFooterName") here caused the
+  // editor's footer to be used for multiple cloned boxes, resulting
+  // in the address being rendered twice (editor + overlay). Avoid
+  // the global fallback so each box uses its own local footer only.
+  const editorFooter = box.querySelector("#storeFooterName");
   let addressText = "", phoneText = "";
   if (editorFooter) {
     const addr = editorFooter.querySelector(".store-address");
@@ -845,39 +1199,69 @@ function syncFinalLayerFor(box){
   spanAddr.textContent = addressText;
   footerFinal.appendChild(spanAddr);
   if (phoneText) {
+    // group separator, icon and phone into a single inline group
+    const group = document.createElement('span');
+    group.className = 'contact-group';
+
     const sep = document.createElement("span");
     sep.className = "separator";
-    sep.textContent = " | ";
+    sep.textContent = "|";
+
     const spanPhone = document.createElement("span");
     spanPhone.className = "store-mobile";
     spanPhone.textContent = phoneText;
-    footerFinal.appendChild(sep);
-    footerFinal.appendChild(spanPhone);
+
+    group.appendChild(sep);
+    group.appendChild(spanPhone);
+    footerFinal.appendChild(group);
   }
 
   ensureContactIconAfterSeparator(box);
   // ensure footer positions are recalculated to respect the editor radio setting
   try { adjustFooterPosition(); } catch(e){ /* ignore */ }
+  
+  // Add a per-template Download A4 button on cloned templates so users can
+  // download a single Perfect A4 PDF for that generated template.
+  try { addDownloadButtonToNode(box); } catch(e) { console.warn('addDownloadButtonToNode failed', e); }
 }
 
 function cloneExactFooter(sourceBox, targetBox) {
-  const src = sourceBox.querySelector("#storeFooterName");
+  // prefer the live editor footer, but fall back to the final footer
+  let src = sourceBox.querySelector("#storeFooterName") || sourceBox.querySelector("#storeFooterNameFinal");
+  // If the source box doesn't contain the editor footer (edge cases),
+  // fallback to the global editor footer element so clones still get
+  // the address when the live footer is mounted elsewhere.
+  if (!src) {
+    src = document.getElementById('storeFooterName') || document.getElementById('storeFooterNameFinal') || src;
+  }
   const dst = targetBox.querySelector("#storeFooterNameFinal");
 
   if (!src || !dst) return;
 
+  // copy content and classes
   dst.innerHTML = src.innerHTML;
-  dst.className = src.className;
-  dst.style.cssText = src.style.cssText;
+  dst.className = src.className || dst.className;
 
-  dst.style.left = src.style.left;
-  dst.style.bottom = src.style.bottom;
-  dst.style.transform = src.style.transform;
+  // copy inline styles if present
+  try {
+    dst.style.cssText = src.style.cssText || dst.style.cssText;
+  } catch (e) { /* ignore css copy errors */ }
 
-  dst.style.display = "inline-flex";
-  dst.style.alignItems = "center";
-  dst.style.justifyContent = "center";
-  dst.style.whiteSpace = "nowrap";
+  // copy computed positioning so clone footer aligns like the source
+  try {
+    const comp = window.getComputedStyle(src);
+    if (comp) {
+      if (comp.left) dst.style.left = comp.left;
+      if (comp.bottom) dst.style.bottom = comp.bottom;
+      if (comp.transform) dst.style.transform = comp.transform;
+      if (comp.display) dst.style.display = comp.display;
+      if (comp.alignItems) dst.style.alignItems = comp.alignItems;
+      if (comp.justifyContent) dst.style.justifyContent = comp.justifyContent;
+      if (comp.whiteSpace) dst.style.whiteSpace = comp.whiteSpace;
+    }
+  } catch (e) { /* ignore */ }
+
+  dst.style.whiteSpace = dst.style.whiteSpace || "nowrap";
 }
 
 
@@ -888,11 +1272,17 @@ function ensureContactIconAfterSeparator(container = document) {
     const sep = f.querySelector('.separator');
     if (!sep) return;
 
-    // if a contact-icon wrapper exists, make sure it's after the separator
+    // if a contact-icon wrapper exists, ensure it's positioned before the
+    // phone number (i.e. after the separator but before the .store-mobile).
     let iconWrapper = f.querySelector('.contact-icon');
     if (iconWrapper) {
-      const next = sep.nextElementSibling;
-      if (next !== iconWrapper) sep.insertAdjacentElement('afterend', iconWrapper);
+      const phone = f.querySelector('.store-mobile');
+      if (phone && phone.parentNode) {
+        if (phone.previousElementSibling !== iconWrapper) phone.parentNode.insertBefore(iconWrapper, phone);
+      } else {
+        const next = sep.nextElementSibling;
+        if (next !== iconWrapper) sep.insertAdjacentElement('afterend', iconWrapper);
+      }
       // ensure the inner <img> has consistent attributes
       const existingImg = iconWrapper.querySelector('img');
       if (existingImg) {
@@ -902,7 +1292,7 @@ function ensureContactIconAfterSeparator(container = document) {
         existingImg.style.verticalAlign = 'middle';
         existingImg.style.objectFit = 'contain';
         existingImg.style.pointerEvents = 'none';
-        const iconSrc = CONTACT_ICON_BASE64 || '/static/images/contact-logo.svg';
+        const iconSrc = CONTACT_ICON_BASE64 || CONTACT_SVG_CANDIDATES[0];
         if (existingImg.getAttribute('src') !== iconSrc) existingImg.setAttribute('src', iconSrc);
       }
       return;
@@ -913,11 +1303,11 @@ function ensureContactIconAfterSeparator(container = document) {
     iconWrapper.className = 'contact-icon';
     iconWrapper.style.display = 'inline-flex';
     iconWrapper.style.alignItems = 'center';
-    iconWrapper.style.marginLeft = '6px';
+    iconWrapper.style.marginLeft = '0px';
 
     const img = document.createElement('img');
     img.alt = 'phone';
-    const iconSrc = CONTACT_ICON_BASE64 || '/static/images/contact-logo.svg';
+    const iconSrc = CONTACT_ICON_BASE64 || CONTACT_SVG_CANDIDATES[0];
     img.setAttribute('src', iconSrc);
     img.style.width = '18px';
     img.style.height = '18px';
@@ -927,8 +1317,80 @@ function ensureContactIconAfterSeparator(container = document) {
     img.style.pointerEvents = 'none';
 
     iconWrapper.appendChild(img);
-    sep.insertAdjacentElement('afterend', iconWrapper);
+    // prefer inserting before phone if it exists
+    const phone = f.querySelector('.store-mobile');
+    if (phone && phone.parentNode) {
+      phone.parentNode.insertBefore(iconWrapper, phone);
+    } else {
+      sep.insertAdjacentElement('afterend', iconWrapper);
+    }
   });
+}
+
+
+// Create and attach a small Download A4 button to a template `box`.
+function addDownloadButtonToNode(box) {
+  if (!box || box.id === 'templateBox') return;
+  // avoid adding multiple buttons
+  if (box.querySelector('.download-a4-btn')) return;
+
+  const ctrl = document.createElement('div');
+  ctrl.style.position = 'absolute';
+  ctrl.style.top = '6px';
+  ctrl.style.right = '6px';
+  ctrl.style.zIndex = 99999;
+  ctrl.style.pointerEvents = 'auto';
+
+  const btn = document.createElement('button');
+  btn.className = 'download-a4-btn';
+  btn.textContent = '📥 A4';
+  btn.title = 'Download Perfect A4 PDF for this template';
+  btn.style.padding = '6px 8px';
+  btn.style.borderRadius = '6px';
+  btn.style.border = '0';
+  btn.style.background = '#2c4fb0';
+  btn.style.color = '#fff';
+  btn.style.cursor = 'pointer';
+  btn.style.fontSize = '13px';
+
+  btn.onclick = async function(e){
+    e.stopPropagation();
+    try {
+      // Prepare background candidate if available (use global vars if set)
+      let bg = null;
+      try {
+        if (typeof TEMPLATE_BG_DATA_URL !== 'undefined' && TEMPLATE_BG_DATA_URL) {
+          const i = new Image();
+          i.src = TEMPLATE_BG_DATA_URL;
+          await new Promise(r => { i.onload = r; i.onerror = r; });
+          bg = i;
+        }
+      } catch(_) { bg = null; }
+
+      const a4Canvas = await createA4CanvasFromBox(box, bg);
+      const imgData = a4Canvas.toDataURL('image/jpeg', 0.95);
+      if (!window.jspdf || !window.jspdf.jsPDF) { alert('PDF library not loaded. Refresh the page.'); return; }
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF('p','mm','a4');
+      pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297);
+
+      // derive file name from store address if present
+      let name = 'Template';
+      try {
+        const addrEl = box.querySelector('.store-address');
+        if (addrEl && addrEl.textContent.trim()) {
+          name = addrEl.textContent.trim().substring(0,40).replace(/[^a-zA-Z0-9]+/g, '_');
+        }
+      } catch(e){}
+      pdf.save(`${name}_PerfectA4.pdf`);
+    } catch (err) {
+      console.error('Download A4 failed', err);
+      alert('Error creating A4 PDF: ' + (err && err.message ? err.message : err));
+    }
+  };
+
+  ctrl.appendChild(btn);
+  box.appendChild(ctrl);
 }
 
 
@@ -1353,9 +1815,6 @@ document.getElementById('templateUploadSecondary')?.addEventListener('change', f
   };
   reader.readAsDataURL(file);
 });
-
-
-
 
 
 
@@ -2227,6 +2686,15 @@ function getFooterInfoFromBox(box) {
 
 async function downloadAllPerfectA4() {
   console.log("=== Starting Ultra HD A4 PDF Generator (NO html2canvas) ===");
+  // Ensure live footer state is applied to the DOM before starting export.
+  // If the user edited footer inputs and immediately clicked Download,
+  // update the DOM so exported PDFs include the latest address.
+  try {
+    if (typeof updateFooterInfo === 'function') updateFooterInfo();
+    try { runFooterFixes(document); } catch(e){}
+    // short wait to allow styles/fonts to settle
+    await new Promise(r => setTimeout(r, 120));
+  } catch (e) { /* ignore */ }
 
   let overlay = null;
   try {
@@ -2332,9 +2800,16 @@ async function downloadAllPerfectA4() {
     }
 
     const containerRoot = document.getElementById("generatedTemplates") || document.getElementById("templatesContainer");
+    // Include any node that looks like a generated template: nodes with
+    // `data-store-index`, legacy `.template-box`, or id patterns used
+    // by template clones. Also accept nodes that have either a
+    // `.store-address` element or a `#storeFooterName` /
+    // `#storeFooterNameFinal` footer element so templates are not
+    // skipped when the address was moved to a final overlay.
+    // Include all likely template nodes (don't require `.store-address`)
+    // — some generated clones may only have the final footer overlay.
     const datasetNodes = containerRoot
-      ? Array.from(containerRoot.querySelectorAll("[data-store-index]"))
-          .filter(node => node.querySelector(".store-address"))
+      ? Array.from(containerRoot.querySelectorAll("[data-store-index], .template-box, [id^='template_sheet_'], [id^='template_clone_'], [id^='template_pair_']"))
       : [];
 
     let storeGroups = [];
@@ -2533,9 +3008,19 @@ async function downloadAllPerfectA4() {
         // template or editor preview). If html2canvas + our helper exists
         // and succeeds, use that snapshot directly as the A4 page so the
         // exported PDF matches the live/generated template exactly.
-        try {
-          // if (window.html2canvas && typeof createA4CanvasFromBox === 'function') {
-            if (window.html2canvas && typeof createA4CanvasFromBox === 'function') {
+            try {
+              // Ensure the exported box has the synced final footer layer
+              try {
+                if (typeof syncFinalLayerFor === 'function') syncFinalLayerFor(box);
+                // If there is a main editor footer, copy it into this box so
+                // the exported snapshot matches the generated preview exactly.
+                const mainBox = document.getElementById && document.getElementById('templateBox');
+                if (mainBox && typeof cloneExactFooter === 'function') {
+                  cloneExactFooter(mainBox, box);
+                }
+              } catch(e) { /* ignore sync errors */ }
+
+              if (window.html2canvas && typeof createA4CanvasFromBox === 'function') {
             // Ensure any contact SVGs inside this box are inlined and
             // converted to PNG data URLs so html2canvas can capture them.
             // let _tempId = null;
@@ -2588,11 +3073,6 @@ async function downloadAllPerfectA4() {
         } catch(e) {
           console.warn('Error cleaning up temporary id for snapshot', e);
         }
-
-
-
-
-
 
             const snapA4 = await createA4CanvasFromBox(box, bgToUse);
             if (snapA4 && snapA4.width && snapA4.height) {
@@ -2850,3 +3330,70 @@ async function downloadAllPerfectA4() {
     alert("❌ Error in downloadAllPerfectA4: " + err.message);
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
