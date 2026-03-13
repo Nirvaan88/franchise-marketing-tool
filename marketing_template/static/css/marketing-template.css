@@ -602,8 +602,8 @@ h1 {
 
 .contact-icon {
   display: inline-flex !important;
-  width: 18px !important;
-  height: 18px !important;
+  width: 22px !important;
+  height: 22px !important;
   vertical-align: middle !important;
   line-height: 1 !important;
   margin: 0 !important;
@@ -814,8 +814,8 @@ display:none !important;
 
 .contact-icon img {
   display: block !important;
-  width: 18px !important;
-  height: 18px !important;
+  width: 20px !important;
+  height: 20px !important;
   opacity: 1 !important;
   visibility: visible !important;
   filter: none !important;
@@ -828,9 +828,9 @@ display:none !important;
 /* Inline SVG sizing when we replace the <img> with inline SVG */
 .contact-icon svg {
   display: block !important;
-  height: 18px !important;
+  height: 20px !important;
   width: auto !important;
-  max-height: 18px !important;
+  max-height: 20px !important;
 }
 
 /* Mobile number: bold, same font as address, but without extra strokes/shadows */
@@ -969,8 +969,8 @@ display:none !important;
 #storeFooterNameFinal .contact-icon,
 #templateBox .contact-icon {
   margin: 0 6px 0 0 !important;
-  width: 18px !important;
-  height: 18px !important;
+  width: 22px !important;
+  height: 22px !important;
 }
 
 #storeFooterName .store-mobile,
