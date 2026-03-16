@@ -629,9 +629,9 @@ h1 {
 #storeFooterName,
 #storeFooterNameFinal {
   position: absolute;
-  bottom: 48px !important;
+  bottom: -8mm !important;
   left: 50%;
-  transform: translateX(-52%);
+  transform: translateX(-50%);
   text-align: center;
   color: #000;
   font-size: 18px;
@@ -693,9 +693,9 @@ h1 {
 #storeFooterName,
 #storeFooterNameFinal {
   position: absolute;
-  bottom: -10mm !important;
+  bottom: -8mm !important;
   left: 50% !important;
-  transform: translateX(-41%) !important; /* moved further left */
+  transform: translateX(-50%) !important; /* centered */
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;

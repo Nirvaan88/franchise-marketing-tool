@@ -2403,7 +2403,7 @@ async function downloadAllPerfectA4() {
         const DPI_A4 = 300; // canvas sized for ~300 DPI
         const shiftMmA4 = 16;
         const shiftPxA4 = (shiftMmA4 * DPI_A4) / 25.4;
-        const footerNudgeUpPx = 175; // move footer/store-address slightly more upward in Download All A4 export
+        const footerNudgeUpPx = 160; // tuned upward nudge for Download All A4 export
         const rawFooterY = A4_H * footerRatioY + 50 + shiftPxA4;
         const cappedFooterY = Math.min(A4_H - 20, rawFooterY); // keep small bottom margin
         const footerY = Math.max(0, cappedFooterY - footerNudgeUpPx);
@@ -2423,7 +2423,7 @@ async function downloadAllPerfectA4() {
         const totalWidth = addressWidth + iconSize + iconGap + phoneWidth;
 
         // Footer line position in Download All Perfect A4 export
-        const footerNudgeLeftPx = 80;
+        const footerNudgeLeftPx = 0; // no horizontal nudge — center the footer horizontally
         const startX = Math.round((A4_W - totalWidth) / 2) - footerNudgeLeftPx;
         let x = startX;
 
