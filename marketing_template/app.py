@@ -2,8 +2,12 @@ import os
 import json
 from flask import Flask, render_template, session, redirect, url_for, request
 
-# For reading Excel
-import pandas as pd
+# For reading Excel (optional). If pandas isn't installed, fall back gracefully.
+try:
+    import pandas as pd
+except Exception:
+    pd = None
+    print("[warning] pandas not installed — Excel-related features will be disabled.")
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"   # Needed for sessions

@@ -703,10 +703,11 @@ h1 {
   white-space: nowrap !important;
   width: max-content;
   max-width: 92%;
-  gap: 4px !important;
-  font-size: 18px !important;
+  gap: 6px !important;
+  font-size: 20px !important; /* slightly larger to match export */
   color: #000 !important;
   font-weight: 900 !important;
+  letter-spacing: 0.6px;
 }
 
 
@@ -729,14 +730,14 @@ h1 {
 /* Remove left shift for long addresses - keep everything centered */
 #storeFooterName.long,
 #storeFooterNameFinal.long {
-  transform: translateX(-56%) !important;
+  transform: translateX(-50%) !important;
 }
 
 /* Separator (pipe) — keep fixed size and inline */
 .separator {
   display: inline !important;
   font-weight: 700;
-  font-size: 24px;
+  font-size: 26px; /* slightly larger separator */
   line-height: 1 !important;
   color: #000000;
   margin: 0 -2px 0 0 !important;

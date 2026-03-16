@@ -2423,7 +2423,8 @@ async function downloadAllPerfectA4() {
         const totalWidth = addressWidth + iconSize + iconGap + phoneWidth;
 
         // Footer line position in Download All Perfect A4 export
-        const footerNudgeLeftPx = 0; // no horizontal nudge — center the footer horizontally
+        // Increased left nudge so address sits more to the left in exported A4 PDFs
+        const footerNudgeLeftPx = 120;
         const startX = Math.round((A4_W - totalWidth) / 2) - footerNudgeLeftPx;
         let x = startX;
 
