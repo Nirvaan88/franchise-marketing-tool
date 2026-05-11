@@ -9,7 +9,14 @@ except Exception:
     pd = None
     print("[warning] pandas not installed — Excel-related features will be disabled.")
 
-app = Flask(__name__)
+# app = Flask(__name__)
+
+app = Flask(
+    __name__,
+    static_url_path='/pais/static',
+    static_folder='static',
+    template_folder='templates'
+)
 app.secret_key = "supersecretkey"   # Needed for sessions
 
 # Load products once from JSON
