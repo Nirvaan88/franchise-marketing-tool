@@ -1,0 +1,15 @@
+nohup: ignoring input
+[2026-05-14 12:53:10 +0000] [2015459] [INFO] Starting gunicorn 26.0.0
+[2026-05-14 12:53:10 +0000] [2015459] [INFO] Listening at: http://0.0.0.0:5000 (2015459)
+[2026-05-14 12:53:10 +0000] [2015459] [INFO] Using worker: sync
+[2026-05-14 12:53:10 +0000] [2015460] [INFO] Booting worker with pid: 2015460
+[2026-05-14 12:53:10 +0000] [2015459] [INFO] Control socket listening at /run/user/1000/gunicorn.ctl
+[2026-05-14 12:55:48 +0000] [2015459] [INFO] Handling signal: hup
+[2026-05-14 12:55:48 +0000] [2015459] [INFO] Hang up: Master
+[2026-05-14 12:55:48 +0000] [2015459] [WARNING] Worker (pid:2015460) was sent SIGHUP!
+[2026-05-14 12:55:48 +0000] [2015552] [INFO] Booting worker with pid: 2015552
+[2026-05-14 12:55:48 +0000] [2015459] [INFO] Control socket listening at /run/user/1000/gunicorn.ctl
+[2026-05-15 05:06:47 +0000] [2015459] [INFO] Handling signal: term
+[2026-05-15 05:06:47 +0000] [2015552] [INFO] Worker exiting (pid: 2015552)
+[2026-05-15 05:06:47 +0000] [2015459] [INFO] Worker (pid:2015552) was sent SIGTERM!
+[2026-05-15 05:06:47 +0000] [2015459] [INFO] Shutting down: Master
